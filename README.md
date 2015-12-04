@@ -1,7 +1,7 @@
 #Framework JS
 
 Simple boilerplate for a javascript framework, includes a feature rich router, built in template loader and a templating engine.
-It should be easy to get started, there's less than a hundred lines of code and it's not super advanced.
+It should be easy to get started, there's about a hundred lines of code and it's not super advanced.
 
 
 ## Usage
