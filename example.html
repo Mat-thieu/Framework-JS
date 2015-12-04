@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Framework</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.2/css/materialize.min.css">
+</head>
+<body>
+	<div class="container">
+		<div class="row">
+			<div class="col s12">
+				<h2>Framework</h2>
+				<a href="#">Home</a><br>
+				<a href="#tst/10">Test</a><br>
+				<a href="#card/1">Settings</a>
+				<div id="output"></div>
+			</div>
+		</div>
+	</div>
+
+	<script src="framework.js"></script>
+	<script>
+		var _id = function(id){return document.getElementById(id);},
+			_class = function(className){return document.getElementsByClassName(className);},
+			_tag = function(tag){return document.getElementsByTagName(tag);},
+			_query = function(query){return documen.querySelectorAll(query);};
+
+		Object.prototype.removeChildren = function(){
+			while (this.firstChild) this.removeChild(this.firstChild);
+			return this;
+		}
+
+		router.makeRoute('/', function(){
+			getTemplate({name : 'home', data : {lorem : "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Cumque, reiciendis."}}, function(tmp){
+				_id('output').removeChildren().appendChild(tmp);
+			})
+		})
+
+		router.makeRoute('tst/{id}', function(params){
+			getTemplate({name : 'test', data : {title : 'Epic list', id : params['id']}}, function(tmp){
+				_id('output').removeChildren().appendChild(tmp);
+			})
+		})
+
+		var cardCount = 1;
+		router.makeRoute('card/{cardId}', function(params){
+			cardCount++;
+			getTemplate({
+				name : 'settings',
+				data : {
+					title : 'Card '+params['cardId']+'!',
+					text : 'Some random text',
+					linkName : 'Next card',
+					cardId : cardCount
+				}
+			},function(tmp){
+				_id('output').removeChildren().appendChild(tmp);
+			})
+		})
+
+		router.init();
+
+	</script>
+</body>
+</html>

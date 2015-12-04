@@ -1,0 +1,96 @@
+var Router = function(){
+	this.routes = [];
+	this.homeroute = {available : false, index : 0};
+}
+
+Router.prototype = {
+	makeRoute : function(routeName, func){
+		var routerVariables = routeName.match(/{([^{}]+)}/g, "$1");
+		if(routerVariables == null) this.routes.push({route : routeName, cb : func, params : {}});
+		else{
+		    var strippedRouterVariables = [];
+		    for (var i = 0; i < routerVariables.length; i++) {
+		        strippedRouterVariables.push(routerVariables[i].replace('{', '').replace('}', ''));
+		    };
+
+			this.routes.push({route : routeName, cb : func, params : strippedRouterVariables});
+		}
+	},
+	analyzeHash : function(hash){
+		if(this.homeroute.available && (hash == '#' || hash == '')) this.routes[this.homeroute.index]['cb']();
+		else{
+			this.routes.forEach(function(val, ind){
+				var route = "#"+val['route'];
+				var routeMatcher = new RegExp(route.replace(/{[^\s/]+}/g, '([\\w-]+)'));
+				var url = hash;
+
+				var match = url.match(routeMatcher);
+
+				if(match){
+					var params = {};
+					val['params'].forEach(function(pVal, pInd){
+						params[pVal] = match[pInd+1];
+					})
+					val['cb'](params);
+				}
+			})
+		}
+	},
+	init : function(){
+		var self = this;
+		this.routes.forEach(function(val, ind){
+			if(val['route'] == '/'){
+				self.homeroute.available = true;
+				self.homeroute.index = ind;
+			}
+		})
+		this.analyzeHash(window.location.hash);
+	}
+}
+
+var getTemplate = function(settings, cb){
+	settings['name'] = settings['name'] || false;
+	settings['data'] = settings['data'] || false;
+
+	if(!settings['name']){
+		console.error('No template specified');
+		cb();
+		return false;
+	}
+	else{
+		var request = new XMLHttpRequest();
+		request.open('GET', '/templates/'+settings['name']+'.html', true);
+		request.onload = function() {
+			if (request.status >= 200 && request.status < 400) {
+				var res = request.responseText;
+
+				if(settings['data']){
+					var tmpVar = res.match(/{([^{}]+)}/g, "$1");
+				    for (var i = 0; i < tmpVar.length; i++) {
+				    	var regx = new RegExp(tmpVar[i], "g");
+				    	res = res.replace( regx, settings['data'][tmpVar[i].replace('{', '').replace('}', '')] );
+				    };
+				}
+
+				var frag = document.createDocumentFragment();
+			    var tmp = document.createElement('span');
+			    tmp.innerHTML = res;
+			    frag.appendChild(tmp.firstChild);
+				cb(frag);
+			}
+			else console.error('Error loading data');
+		};
+
+		request.onerror = function() {
+			alert('Error loading template');
+		};
+
+		request.send();
+	}
+}
+
+var router = new Router();
+
+window.onhashchange = function(){
+	router.analyzeHash(window.location.hash);
+}
