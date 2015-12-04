@@ -4,7 +4,7 @@ var Router = function(){
 }
 
 Router.prototype = {
-	makeRoute : function(routeName, func){
+	listen : function(routeName, func){
 		var routerVariables = routeName.match(/{([^{}]+)}/g, "$1");
 		if(routerVariables == null) this.routes.push({route : routeName, cb : func, params : {}});
 		else{
