@@ -51,8 +51,14 @@ var cache = {
 	templates : {}
 }
 
+Object.prototype.isSuccessful = function() {
+	if (this.status == undefined) return false;
+	return this.status >= 200 && this.status < 400;
+}
+
+
 var get = {
-	template : function(settings, cb){
+	template : function(settings, callback){
 		settings['name'] = settings['name'] || false;
 		settings['data'] = settings['data'] || false;
 
@@ -74,20 +80,20 @@ var get = {
 
 		if(!settings['name']){
 			console.error('No template specified');
-			cb();
+			callback();
 			return false;
 		}
 		else if(settings['name'] in cache.templates){
-			cb(fillTemplate(cache.templates[settings['name']]));
+			callback(fillTemplate(cache.templates[settings['name']]));
 		}
 		else{
 			var request = new XMLHttpRequest();
 			request.open('GET', '/templates/'+settings['name']+'.html', true);
 			request.onload = function() {
-				if (request.status >= 200 && request.status < 400) {
+				if (request.isSuccessful()) {
 					var template = request.responseText;
 					cache.templates[settings['name']] = template;
-					cb(fillTemplate(template));
+					callback(fillTemplate(template));
 				}
 				else console.error('Error loading data');
 			};
@@ -103,7 +109,7 @@ var get = {
 		var request = new XMLHttpRequest();
 		request.open('GET', url, true);
 		request.onload = function() {
-			if (request.status >= 200 && request.status < 400) {
+			if (request.isSuccessful()) {
 				var res = false;
 				try{
 			        res = JSON.parse(request.responseText);
