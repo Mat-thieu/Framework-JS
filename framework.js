@@ -22,9 +22,8 @@ Router.prototype = {
 			this.routes.forEach(function(val, ind){
 				var route = "#"+val['route'];
 				var routeMatcher = new RegExp(route.replace(/{[^\s/]+}/g, '([\\w-]+)'));
-				var url = hash;
 
-				var match = url.match(routeMatcher);
+				var match = hash.match(routeMatcher);
 
 				if(match){
 					var params = {};
@@ -48,35 +47,72 @@ Router.prototype = {
 	}
 }
 
-var getTemplate = function(settings, cb){
-	settings['name'] = settings['name'] || false;
-	settings['data'] = settings['data'] || false;
+var cache = {
+	templates : {}
+}
 
-	if(!settings['name']){
-		console.error('No template specified');
-		cb();
-		return false;
-	}
-	else{
+var get = {
+	template : function(settings, cb){
+		settings['name'] = settings['name'] || false;
+		settings['data'] = settings['data'] || false;
+
+		var fillTemplate = function(res){
+			if(settings['data']){
+				var tmpVar = res.match(/{([^{}]+)}/g, "$1");
+			    for (var i = 0; i < tmpVar.length; i++) {
+			    	var regx = new RegExp(tmpVar[i], "g");
+			    	res = res.replace( regx, settings['data'][tmpVar[i].replace('{', '').replace('}', '')] );
+			    };
+			}
+
+			var frag = document.createDocumentFragment();
+		    var tmp = document.createElement('span');
+		    tmp.innerHTML = res;
+		    frag.appendChild(tmp.firstChild);
+			return frag;
+		}
+
+		if(!settings['name']){
+			console.error('No template specified');
+			cb();
+			return false;
+		}
+		else if(settings['name'] in cache.templates){
+			cb(fillTemplate(cache.templates[settings['name']]));
+		}
+		else{
+			var request = new XMLHttpRequest();
+			request.open('GET', '/templates/'+settings['name']+'.html', true);
+			request.onload = function() {
+				if (request.status >= 200 && request.status < 400) {
+					var template = request.responseText;
+					cache.templates[settings['name']] = template;
+					cb(fillTemplate(template));
+				}
+				else console.error('Error loading data');
+			};
+
+			request.onerror = function() {
+				alert('Error loading template');
+			};
+
+			request.send();
+		}
+	},
+	json : function(url, cb){
 		var request = new XMLHttpRequest();
-		request.open('GET', '/templates/'+settings['name']+'.html', true);
+		request.open('GET', url, true);
 		request.onload = function() {
 			if (request.status >= 200 && request.status < 400) {
-				var res = request.responseText;
+				var res = false;
+				try{
+			        res = JSON.parse(request.responseText);
+			    }
+			    catch(e){
+			        console.error('Not a valid JSON response', e);
+			    }
 
-				if(settings['data']){
-					var tmpVar = res.match(/{([^{}]+)}/g, "$1");
-				    for (var i = 0; i < tmpVar.length; i++) {
-				    	var regx = new RegExp(tmpVar[i], "g");
-				    	res = res.replace( regx, settings['data'][tmpVar[i].replace('{', '').replace('}', '')] );
-				    };
-				}
-
-				var frag = document.createDocumentFragment();
-			    var tmp = document.createElement('span');
-			    tmp.innerHTML = res;
-			    frag.appendChild(tmp.firstChild);
-				cb(frag);
+			    if(res) cb(res);
 			}
 			else console.error('Error loading data');
 		};

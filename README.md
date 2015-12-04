@@ -3,6 +3,7 @@
 Simple boilerplate for a javascript framework, includes a feature rich router, built in template loader and a templating engine.
 It should be easy to get started, there's less than a hundred lines of code and it's not super advanced.
 
+
 ## Usage
 
 Load the script near the bottom of your body.
@@ -43,7 +44,7 @@ Now load a template using getTemplate() and inject some data into it.
 
 ```javascript
 router.makeRoute('tst/{id}', function(params){
-	getTemplate({
+	get.template({
 		name : 'test', // Will look for /templates/test.html
 		data : {title : 'Epic list', id : params['id']} // Make this data available in the template
 		// The id variable will be equal to whatever you put into the URL (e.g. tst/10 will send 10)
@@ -68,6 +69,19 @@ Perhaps add a link to your route
 That's all.
 
 
+## Other method(s)
+
+Retrieve JSON data inside your route
+
+```javascript
+router.makeRoute('tst/{id}', function(params){
+	get.json('api.php?get='+params['id'], function(data){
+		console.log(data)
+	})
+})
+```
+
+
 ##Todo and notes
 
 This script is compatible with all modern browsers (IE 9 and higher).
@@ -75,7 +89,5 @@ This script is compatible with all modern browsers (IE 9 and higher).
 I have not looked at security.
 
 **Todo**
-- Cache templates, don't reload them
-- Add a method to retreive JSON data
 - Add looping to template engine
 - Add comments

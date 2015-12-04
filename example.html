@@ -31,13 +31,16 @@
 		}
 
 		router.makeRoute('/', function(){
-			getTemplate({name : 'home', data : {lorem : "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Cumque, reiciendis."}}, function(tmp){
+			get.template({name : 'home', data : {lorem : "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Cumque, reiciendis."}}, function(tmp){
 				_id('output').removeChildren().appendChild(tmp);
 			})
 		})
 
 		router.makeRoute('tst/{id}', function(params){
-			getTemplate({name : 'test', data : {title : 'Epic list', id : params['id']}}, function(tmp){
+			get.json('api.php', function(data){
+				console.log(data);
+			})
+			get.template({name : 'test', data : {title : 'Epic list', id : params['id']}}, function(tmp){
 				_id('output').removeChildren().appendChild(tmp);
 			})
 		})
@@ -45,7 +48,7 @@
 		var cardCount = 1;
 		router.makeRoute('card/{cardId}', function(params){
 			cardCount++;
-			getTemplate({
+			get.template({
 				name : 'settings',
 				data : {
 					title : 'Card '+params['cardId']+'!',
