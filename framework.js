@@ -51,6 +51,11 @@ var cache = {
 	templates : {}
 }
 
+Number.prototype.isSuccessful = function() {
+	if (this.status == undefined) return false;
+	return this.status >= 200 && this.status < 400;
+}
+
 var get = {
 	template : function(settings, cb){
 		settings['name'] = settings['name'] || false;
@@ -84,7 +89,7 @@ var get = {
 			var request = new XMLHttpRequest();
 			request.open('GET', '/templates/'+settings['name']+'.html', true);
 			request.onload = function() {
-				if (request.status >= 200 && request.status < 400) {
+				if (request.status.isSuccessful()) {
 					var template = request.responseText;
 					cache.templates[settings['name']] = template;
 					cb(fillTemplate(template));
@@ -103,7 +108,7 @@ var get = {
 		var request = new XMLHttpRequest();
 		request.open('GET', url, true);
 		request.onload = function() {
-			if (request.status >= 200 && request.status < 400) {
+			if (request.status.isSuccessful()) {
 				var res = false;
 				try{
 			        res = JSON.parse(request.responseText);
