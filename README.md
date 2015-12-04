@@ -91,3 +91,4 @@ I have not looked at security.
 **Todo**
 - Add looping to template engine
 - Add comments
+- Add configuration (like the location of your templates, ajax timeouts, etc.)
