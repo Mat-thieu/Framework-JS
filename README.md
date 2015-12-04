@@ -1,7 +1,7 @@
 #Framework JS
 
 Simple boilerplate for a javascript framework, includes a feature rich router, built in template loader and a templating engine.
-It should be easy to get started, there's less than a hundred lines of code and it's not super advanced.
+It should be easy to get started, there's about a hundred lines of code and it's not super advanced.
 
 
 ## Usage
@@ -92,3 +92,4 @@ I have not looked at security.
 - Add looping to template engine
 - Add comments
 - Add configuration (like the location of your templates, ajax timeouts, etc.)
+- Perhaps add a method that first loads JSON and then directly injects it into a given template (this might be too mich for a boilerplate script)
