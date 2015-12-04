@@ -1,6 +1,7 @@
 #Framework JS
 
 Simple boilerplate for a javascript framework, includes a feature rich router, built in template loader and a templating engine.
+It should be easy to get started, there's less than a hundred lines of code and it's not super advanced.
 
 ## Usage
 
@@ -70,8 +71,11 @@ That's all.
 ##Todo and notes
 
 This script is compatible with all modern browsers (IE 9 and higher).
+
 I have not looked at security.
 
+**Todo**
 - Cache templates, don't reload them
 - Add a method to retreive JSON data
 - Add looping to template engine
+- Add comments
