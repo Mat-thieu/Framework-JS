@@ -3,6 +3,10 @@ var Router = function(){
 	this.homeroute = {available : false, index : 0};
 }
 
+/**
+ * Application router
+ * @type {{listen: Function, analyzeHash: Function, init: Function}}
+ */
 Router.prototype = {
 	listen : function(routeName, func){
 		var routerVariables = routeName.match(/{([^{}]+)}/g, "$1");
