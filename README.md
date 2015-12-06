@@ -92,6 +92,7 @@ I have not looked at security.
 - Add looping to template engine
 - Add comments
 - Add configuration (like the location of your templates, ajax timeouts, etc.)
-- Perhaps add a method that first loads JSON and then directly injects it into a given template (this might be too mich for a boilerplate script)
+- Perhaps add a method that first loads JSON and then directly injects it into a given template (this might be too much for a boilerplate script)
 - Reduce number of global variables
 - Resolve conflict when using Object.prototype with jQuery
+- Add namespacing to the router
