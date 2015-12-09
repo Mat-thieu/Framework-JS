@@ -15,11 +15,11 @@ Load the script near the bottom of your body.
 Start creating some routes.
 
 ```javascript
-router.makeRoute('/', function(){
+router.listen('/', function(){
 	// Do something when the home route is called
 })
 
-router.makeRoute('tst/{id}', function(params){
+router.listen('tst/{id}', function(params){
 	// Do something when the url looks like this http://example.com#tst/10
 	// Retrieve the url parameter {id} by using the callback variable params['id']
 	// Note that you can have as many url parameters as you like
@@ -43,8 +43,8 @@ Create a template in the templates folder with some variable entry points
 Now load a template using getTemplate() and inject some data into it.
 
 ```javascript
-router.makeRoute('tst/{id}', function(params){
-	get.template({
+router.listen('tst/{id}', function(params){
+	_get.template({
 		name : 'test', // Will look for /templates/test.html
 		data : {title : 'Epic list', id : params['id']} // Make this data available in the template
 		// The id variable will be equal to whatever you put into the URL (e.g. tst/10 will send 10)
@@ -69,16 +69,30 @@ Perhaps add a link to your route
 That's all.
 
 
-## Other method(s)
+## Other methods
 
 Retrieve JSON data inside your route
 
 ```javascript
-router.makeRoute('tst/{id}', function(params){
-	get.json('api.php?get='+params['id'], function(data){
+router.listen('tst/{id}', function(params){
+	_get.json('api.php?get='+params['id'], function(data){
 		console.log(data)
 	})
 })
+```
+
+By default, the router variable will be available to do routing, to create a namespace, call a new Router instance
+
+```javascript
+// This might change in the next release
+var adminRouter = new Router('/admin');
+
+// Now create a new route
+
+adminRouter.listen('/test', function(){
+	// Will listen to #/admin/test
+})
+
 ```
 
 
