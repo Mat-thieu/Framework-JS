@@ -2,7 +2,7 @@
 
 **This code is not ready for production**
 
-Simple boilerplate for a javascript framework, includes a feature rich router, built in template loader and a templating engine.
+Simple boilerplate for a javascript framework, includes a feature rich router, built in template/JSON loader and [Handlebars templating engine](http://handlebarsjs.com/).
 It should be easy to get started, there's about a hundred lines of code and it's not super advanced.
 
 
@@ -33,8 +33,8 @@ Create a template in the templates folder with some variable entry points
 ```html
 <!-- /templates/test.html -->
 <div class="card-panel">
-	<h2>{title}</h2> <!-- Will expect a title variable -->
-	<h5>ID : {id}</h5>
+	<h2>{{title}}</h2> <!-- Will expect a title variable -->
+	<h5>ID : {{id}}</h5>
 	<ul class="collection">
 		<li class="collection-item">Item 1</li>
 		<li class="collection-item">Item 2</li>
@@ -46,11 +46,10 @@ Now load a template using getTemplate() and inject some data into it.
 
 ```javascript
 router.listen('tst/{id}', function(params){
-	_get.template({
-		name : 'test', // Will look for /templates/test.html
-		data : {title : 'Epic list', id : params['id']} // Make this data available in the template
+	_get.template('test', // Will look for /templates/test.html
+		{title : 'Epic list', id : params['id']} // Make this data available in the template
 		// The id variable will be equal to whatever you put into the URL (e.g. tst/10 will send 10)
-	}, function(tmp){
+	, function(tmp){
 		// Insert the data into the DOM
 		_id('output').removeChildren().appendChild(tmp);
 	})
@@ -83,7 +82,7 @@ router.listen('tst/{id}', function(params){
 })
 ```
 
-By default, the router variable will be available to do routing, to create a namespace, call a new Router instance
+By default, the **router** variable will be available for creating routes, to create a namespace, call a new Router instance
 
 ```javascript
 // This might change in the next release
@@ -105,10 +104,8 @@ This script is compatible with all modern browsers (IE 9 and higher).
 I have not looked at security.
 
 **Todo**
-- Add looping to template engine
 - Add comments
 - Add configuration (like the location of your templates, ajax timeouts, etc.)
 - Perhaps add a method that first loads JSON and then directly injects it into a given template (this might be too much for a boilerplate script)
 - Reduce number of global variables
 - Resolve conflict when using Object.prototype with jQuery
-- Add namespacing to the router
