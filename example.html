@@ -10,30 +10,42 @@
 		<div class="row">
 			<div class="col s12">
 				<h2>Framework</h2>
-				<a href="#/">Home</a><br>
-				<a href="#/tst/10">Test</a><br>
-				<a href="#/card/1">Settings</a>
+				<a href="#/" class="ts">Home</a><br>
+				<a href="#/tst/10" class="ts">Test</a><br>
+				<a href="#/card/1">Settings</a><br>
+				<a href="#/compile">Compile</a>
 				<div id="output"></div>
 			</div>
 		</div>
 	</div>
 
 	<script src="DEV-helpers.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.5/handlebars.min.js"></script>
 	<script src="framework.js"></script>
 	<script>
+		// Methods for the sake of this example
 		var _id = function(id){return document.getElementById(id);},
 			_class = function(className){return document.getElementsByClassName(className);},
 			_tag = function(tag){return document.getElementsByTagName(tag);},
 			_query = function(query){return documen.querySelectorAll(query);};
-
+		Object.defineProperty(Object.prototype, 'on', {
+			value: function(eventName, cb) {
+				if(this.constructor.name == 'HTMLCollection' || this.constructor.name == 'NodeList'){
+					for (var i = this.length - 1; i >= 0; i--) this[i].addEventListener(eventName, function(e){cb(e)}, false);
+				}
+				else this.addEventListener(eventName, function(e){cb(e)}, false);
+			},
+			enumerable: false
+		});
 		Object.prototype.removeChildren = function(){
 			while (this.firstChild) this.removeChild(this.firstChild);
 			return this;
 		}
 
+		// Routes
 		router.listen('/', function(){
 			console.log('/ called');
-			_get.template({name : 'home', data : {lorem : "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Cumque, reiciendis."}}, function(tmp){
+			_get.template('home', {lorem : "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Cumque, reiciendis."}, function(tmp){
 				_id('output').removeChildren().appendChild(tmp);
 			})
 		})
@@ -43,23 +55,31 @@
 			_get.json('api.php', function(data){
 				console.log(data);
 			})
-			_get.template({name : 'test', data : {title : 'Epic list', id : params['id'], arrTest : ['one', 'two', 'three']}}, function(tmp){
+			_get.template('test', {title : 'Epic list', id : params['id'], list : [{title : 'Hello'}, {title : 'World'}, {title : 'Test'}]}, function(tmp){
 				_id('output').removeChildren().appendChild(tmp);
+			})
+		})
+
+		router.listen('/compile', function(){
+			console.log('/compile called');
+			_get.json('api.php', function(data){
+				_get.template('engineUpdate', data, function(template){
+					_id('output').removeChildren().appendChild(template);
+				})
 			})
 		})
 
 		router.listen('/card/{cardId}', function(params){
 			console.log('/card/'+params['cardId']+' called');
 			var cardCount = parseInt(params['cardId'])+1;
-			_get.template({
-				name : 'settings',
-				data : {
-					title : 'Card '+params['cardId']+'!',
-					text : 'Some random text',
-					linkName : 'Next card',
-					cardId : cardCount
-				}
-			},function(tmp){
+
+			_get.template('settings',{
+				title : 'Card '+params['cardId']+'!',
+				text : 'Some random text',
+				linkName : 'Next card',
+				cardId : cardCount
+			},
+			function(tmp){
 				_id('output').removeChildren().appendChild(tmp);
 			})
 		})
@@ -67,11 +87,11 @@
 		var apiRouter = new Router('/api');
 
 		apiRouter.listen('/tst', function(){
-			console.log('Tst API');
+			console.log('Tst /api');
 		})
 
 		apiRouter.listen('/', function(){
-			console.log('Homne API');
+			console.log('Home /api');
 		})
 
 		apiRouter.init();

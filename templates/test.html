@@ -1,7 +1,9 @@
 <div class="card-panel">
-	<h2>{title}</h2>
-	<h5>ID : {id}</h5>
+	<h2>{{title}}</h2>
+	<h5>ID : {{id}}</h5>
 	<ul class="collection">
-		<li class="collection-item">Dude</li>
+	{{#each list}}
+		<li class="collection-item">{{title}}</li>
+	{{/each}}
 	</ul>
 </div>
