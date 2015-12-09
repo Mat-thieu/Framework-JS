@@ -6,7 +6,7 @@ Simple boilerplate for a javascript framework, includes a feature rich router, b
 It should be easy to get started, there's about a hundred lines of code and it's not super advanced.
 
 
-## Usage
+## Basic usage
 
 Load the script near the bottom of your body.
 
@@ -95,6 +95,10 @@ adminRouter.listen('/test', function(){
 })
 
 ```
+
+## Configuration
+
+**--- INDEV ---**
 
 
 ##Todo and notes
