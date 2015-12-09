@@ -1,41 +1,37 @@
 var frameworkCache = {
-	templates : {},
-	namespaces : []
+	templates : {}
 }
 
 var Router = function(namespace){
-	if(frameworkCache.namespaces.indexOf(namespace) !== -1){
-		console.error('Namespace "'+namespace+'" already exists');
-		return false;
-	}
-	else{
-		frameworkCache.namespaces.push(namespace);
-		this.namespace = namespace;
-	}
+	this.namespace = namespace;
 	this.routes = [];
-	this.homeroute = {available : false, index : 0};
+	this.indexroute = {available : false, index : 0};
 }
 
 Router.prototype = {
+	// Register a route
 	listen : function(routeName, func){
-		var routerVariables = routeName.match(/{([^{}]+)}/g, "$1");
-		if(routerVariables == null) this.routes.push({route : routeName, cb : func, params : {}});
+		// Retrieve all router parameters (e.g. input /test/{id} would find {id})
+		var routerParams = routeName.match(/{([^{}]+)}/g, "$1");
+		if(routerParams == null) this.routes.push({route : routeName, cb : func, params : {}});
 		else{
-		    var strippedRouterVariables = [];
-		    for (var i = 0; i < routerVariables.length; i++) {
-		        strippedRouterVariables.push(routerVariables[i].replace('{', '').replace('}', ''));
-		    };
+			// If there are parameters, strip the brackets and store in the routes
+		    var strippedRouterParams = [];
+		    for (var i = 0; i < routerParams.length; i++) strippedRouterParams.push(routerParams[i].replace('{', '').replace('}', ''));
 
-			this.routes.push({route : routeName, cb : func, params : strippedRouterVariables});
+			this.routes.push({route : routeName, cb : func, params : strippedRouterParams});
 		}
 	},
+	// Analyze the given hash and try to find a matching route, if it matches, fire the route's callback function
 	analyzeHash : function(hash){
-		if(this.homeroute.available && hash.isHomeRoute(this.namespace)){
-			this.routes[this.homeroute.index]['cb']();
+		// Handle the indexroute ("/"), this has to happend first because the regex won't catch it
+		if(this.indexroute.available && hash.isHomeRoute(this.namespace)){
+			this.routes[this.indexroute.index]['cb']();
 			return false;
 		}
 		else{
 			var self = this;
+			// Find a matching route
 			this.routes.forEach(function(val, ind){
 				var route = "#"+(self.namespace !== '' ? self.namespace : "")+val['route'];
 				var routeMatcher = new RegExp(route.replace(/{[^\s/]+}/g, '([\\w-]+)'));
@@ -44,6 +40,7 @@ Router.prototype = {
 
 				if(match){
 					var params = {};
+					// Handle a case with and without parameters
 					if(val['params'].length !== 0 && Array.isArray(val['params'])){
 						val['params'].forEach(function(pVal, pInd){
 							params[pVal] = match[pInd+1];
@@ -57,22 +54,30 @@ Router.prototype = {
 			})
 		}
 	},
+	// Add hashchange listener and check if an indexroute got registered
 	init : function(){
 		var self = this;
+		// Search for a homeroute and make it easily available for the analyze method
 		this.routes.forEach(function(val, ind){
 			if(val['route'] == '/'){
-				self.homeroute.available = true;
-				self.homeroute.index = ind;
+				self.indexroute.available = true;
+				self.indexroute.index = ind;
 			}
 		})
+		// Fire the analyze method for the first time
 		this.analyzeHash(window.location.hash);
 
+		// Add hashchange listener
 		window.onhashchange = function(){
 			self.analyzeHash(window.location.hash);
 		}
 	}
 }
 
+// Register the default router
+var router = new Router('');
+
+// Some basic get methods
 var _get = {
 	template : function(name, data, cb){
 		name = name || false;
@@ -84,6 +89,7 @@ var _get = {
 			return false;
 		}
 		else if(name in frameworkCache.templates){
+			// If a template has been stored in cache, load it from there
 			var thisTmp = Handlebars.compile(frameworkCache.templates[name]);
 			cb(thisTmp(data).makeDocumentFragment());
 		}
@@ -93,8 +99,10 @@ var _get = {
 			request.onload = function() {
 				if (request.ajaxIsSuccessful()) {
 					var template = request.responseText;
+					// Add the template to the cache object
 					frameworkCache.templates[name] = template;
 
+					// Parse the template using Handlebars.js
 					thisTmp = Handlebars.compile(template);
 					template = thisTmp(data);
 
@@ -116,6 +124,7 @@ var _get = {
 		request.onload = function() {
 			if (request.ajaxIsSuccessful()) {
 				var res = false;
+				// Check whether the JSON is valid
 				try{
 			        res = JSON.parse(request.responseText);
 			    }
@@ -135,5 +144,3 @@ var _get = {
 		request.send();
 	}
 }
-
-var router = new Router('');

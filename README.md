@@ -6,7 +6,7 @@ Simple boilerplate for a javascript framework, includes a feature rich router, b
 It should be easy to get started, there's about a hundred lines of code and it's not super advanced.
 
 
-## Usage
+## Basic usage
 
 Load the script near the bottom of your body.
 
@@ -96,6 +96,10 @@ adminRouter.listen('/test', function(){
 
 ```
 
+## Configuration
+
+**--- INDEV ---**
+
 
 ##Todo and notes
 
@@ -104,8 +108,9 @@ This script is compatible with all modern browsers (IE 9 and higher).
 I have not looked at security.
 
 **Todo**
-- Add comments
 - Add configuration (like the location of your templates, ajax timeouts, etc.)
+- Add deepcache option, will cache the **compiled** template instead of the **raw** template (increases performance)
+- Add option to use localstorage as cache instead of in-memory cache (with a timeout option)
 - Perhaps add a method that first loads JSON and then directly injects it into a given template (this might be too much for a boilerplate script)
 - Reduce number of global variables
 - Resolve conflict when using Object.prototype with jQuery
