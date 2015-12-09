@@ -1,10 +1,20 @@
-var Router = function(){
+var frameworkCache = {
+	templates : {},
+	namespaces : []
+}
+
+var Router = function(namespace){
+	if(frameworkCache.namespaces.indexOf(namespace) !== -1) return false;
+	else{
+		frameworkCache.namespaces.push(namespace);
+		this.namespace = namespace;
+	}
 	this.routes = [];
 	this.homeroute = {available : false, index : 0};
 }
 
 Router.prototype = {
-	makeRoute : function(routeName, func){
+	listen : function(routeName, func){
 		var routerVariables = routeName.match(/{([^{}]+)}/g, "$1");
 		if(routerVariables == null) this.routes.push({route : routeName, cb : func, params : {}});
 		else{
@@ -17,20 +27,29 @@ Router.prototype = {
 		}
 	},
 	analyzeHash : function(hash){
-		if(this.homeroute.available && (hash == '#' || hash == '')) this.routes[this.homeroute.index]['cb']();
+		if(this.homeroute.available && (hash == '#' || hash == '#/' || hash == '')){
+			this.routes[this.homeroute.index]['cb']();
+			return false;
+		}
 		else{
+			var self = this;
 			this.routes.forEach(function(val, ind){
-				var route = "#"+val['route'];
+				var route = "#"+(self.namespace !== '' ? self.namespace : "")+val['route'];
 				var routeMatcher = new RegExp(route.replace(/{[^\s/]+}/g, '([\\w-]+)'));
 
 				var match = hash.match(routeMatcher);
 
 				if(match){
 					var params = {};
-					val['params'].forEach(function(pVal, pInd){
-						params[pVal] = match[pInd+1];
-					})
-					val['cb'](params);
+					if(val['params'].length !== 0 && Array.isArray(val['params'])){
+						val['params'].forEach(function(pVal, pInd){
+							params[pVal] = match[pInd+1];
+						})
+						val['cb'](params);
+					}
+					else if(self.namespace !== ''){
+						val['cb']();
+					}
 				}
 			})
 		}
@@ -44,14 +63,14 @@ Router.prototype = {
 			}
 		})
 		this.analyzeHash(window.location.hash);
+
+		window.onhashchange = function(){
+			self.analyzeHash(window.location.hash);
+		}
 	}
 }
 
-var cache = {
-	templates : {}
-}
-
-var get = {
+var _get = {
 	template : function(settings, cb){
 		settings['name'] = settings['name'] || false;
 		settings['data'] = settings['data'] || false;
@@ -60,8 +79,8 @@ var get = {
 			if(settings['data']){
 				var tmpVar = res.match(/{([^{}]+)}/g, "$1");
 			    for (var i = 0; i < tmpVar.length; i++) {
-			    	var regx = new RegExp(tmpVar[i], "g");
-			    	res = res.replace( regx, settings['data'][tmpVar[i].replace('{', '').replace('}', '')] );
+		    		var regx = new RegExp(tmpVar[i], "g");
+		    		res = res.replace( regx, settings['data'][tmpVar[i].replace('{', '').replace('}', '')] );
 			    };
 			}
 
@@ -77,16 +96,16 @@ var get = {
 			cb();
 			return false;
 		}
-		else if(settings['name'] in cache.templates){
-			cb(fillTemplate(cache.templates[settings['name']]));
+		else if(settings['name'] in frameworkCache.templates){
+			cb(fillTemplate(frameworkCache.templates[settings['name']]));
 		}
 		else{
 			var request = new XMLHttpRequest();
 			request.open('GET', '/templates/'+settings['name']+'.html', true);
 			request.onload = function() {
-				if (request.status >= 200 && request.status < 400) {
+				if (request.isSuccessful()) {
 					var template = request.responseText;
-					cache.templates[settings['name']] = template;
+					frameworkCache.templates[settings['name']] = template;
 					cb(fillTemplate(template));
 				}
 				else console.error('Error loading data');
@@ -103,7 +122,7 @@ var get = {
 		var request = new XMLHttpRequest();
 		request.open('GET', url, true);
 		request.onload = function() {
-			if (request.status >= 200 && request.status < 400) {
+			if (request.isSuccessful()) {
 				var res = false;
 				try{
 			        res = JSON.parse(request.responseText);
@@ -125,8 +144,4 @@ var get = {
 	}
 }
 
-var router = new Router();
-
-window.onhashchange = function(){
-	router.analyzeHash(window.location.hash);
-}
+var router = new Router('');
