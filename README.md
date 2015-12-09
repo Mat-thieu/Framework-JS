@@ -21,7 +21,7 @@ router.listen('/', function(){
 	// Do something when the home route is called
 })
 
-router.listen('tst/{id}', function(params){
+router.listen('/tst/{id}', function(params){
 	// Do something when the url looks like this http://example.com#tst/10
 	// Retrieve the url parameter {id} by using the callback variable params['id']
 	// Note that you can have as many url parameters as you like
@@ -45,7 +45,7 @@ Create a template in the templates folder with some variable entry points
 Now load a template using getTemplate() and inject some data into it.
 
 ```javascript
-router.listen('tst/{id}', function(params){
+router.listen('/tst/{id}', function(params){
 	_get.template('test', // Will look for /templates/test.html
 		{title : 'Epic list', id : params['id']} // Make this data available in the template
 		// The id variable will be equal to whatever you put into the URL (e.g. tst/10 will send 10)
@@ -75,7 +75,7 @@ That's all.
 Retrieve JSON data inside your route
 
 ```javascript
-router.listen('tst/{id}', function(params){
+router.listen('/tst/{id}', function(params){
 	_get.json('api.php?get='+params['id'], function(data){
 		console.log(data)
 	})
