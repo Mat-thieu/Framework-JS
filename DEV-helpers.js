@@ -6,7 +6,21 @@
 // 	enumerable: false
 // });
 
-Object.prototype.isSuccessful = function() {
+Object.prototype.ajaxIsSuccessful = function() {
 	if (this.status == undefined) return false;
 	return this.status >= 200 && this.status < 400;
+}
+
+String.prototype.makeDocumentFragment = function(){
+	var frag = document.createDocumentFragment();
+    var tmp = document.createElement('span');
+    tmp.innerHTML = this;
+    frag.appendChild(tmp.firstChild);
+
+    return frag;
+}
+
+String.prototype.isHomeRoute = function(namespace){
+	if(this == '#'+(namespace !== '' ? namespace+'/' : '/') || this == '#'+(namespace !== '' ? namespace : '') || this == '') return true;
+	else return false;
 }

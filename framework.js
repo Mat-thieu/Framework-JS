@@ -4,7 +4,10 @@ var frameworkCache = {
 }
 
 var Router = function(namespace){
-	if(frameworkCache.namespaces.indexOf(namespace) !== -1) return false;
+	if(frameworkCache.namespaces.indexOf(namespace) !== -1){
+		console.error('Namespace "'+namespace+'" already exists');
+		return false;
+	}
 	else{
 		frameworkCache.namespaces.push(namespace);
 		this.namespace = namespace;
@@ -27,7 +30,7 @@ Router.prototype = {
 		}
 	},
 	analyzeHash : function(hash){
-		if(this.homeroute.available && (hash == '#' || hash == '#/' || hash == '')){
+		if(this.homeroute.available && hash.isHomeRoute(this.namespace)){
 			this.routes[this.homeroute.index]['cb']();
 			return false;
 		}
@@ -47,8 +50,8 @@ Router.prototype = {
 						})
 						val['cb'](params);
 					}
-					else if(self.namespace !== ''){
-						val['cb']();
+					else {
+						 if(val['route'] !== '/') val['cb']();
 					}
 				}
 			})
@@ -71,42 +74,31 @@ Router.prototype = {
 }
 
 var _get = {
-	template : function(settings, cb){
-		settings['name'] = settings['name'] || false;
-		settings['data'] = settings['data'] || false;
+	template : function(name, data, cb){
+		name = name || false;
+		data = data || false;
 
-		var fillTemplate = function(res){
-			if(settings['data']){
-				var tmpVar = res.match(/{([^{}]+)}/g, "$1");
-			    for (var i = 0; i < tmpVar.length; i++) {
-		    		var regx = new RegExp(tmpVar[i], "g");
-		    		res = res.replace( regx, settings['data'][tmpVar[i].replace('{', '').replace('}', '')] );
-			    };
-			}
-
-			var frag = document.createDocumentFragment();
-		    var tmp = document.createElement('span');
-		    tmp.innerHTML = res;
-		    frag.appendChild(tmp.firstChild);
-			return frag;
-		}
-
-		if(!settings['name']){
+		if(!name){
 			console.error('No template specified');
 			cb();
 			return false;
 		}
-		else if(settings['name'] in frameworkCache.templates){
-			cb(fillTemplate(frameworkCache.templates[settings['name']]));
+		else if(name in frameworkCache.templates){
+			var thisTmp = Handlebars.compile(frameworkCache.templates[name]);
+			cb(thisTmp(data).makeDocumentFragment());
 		}
 		else{
 			var request = new XMLHttpRequest();
-			request.open('GET', '/templates/'+settings['name']+'.html', true);
+			request.open('GET', '/templates/'+name+'.html', true);
 			request.onload = function() {
-				if (request.isSuccessful()) {
+				if (request.ajaxIsSuccessful()) {
 					var template = request.responseText;
-					frameworkCache.templates[settings['name']] = template;
-					cb(fillTemplate(template));
+					frameworkCache.templates[name] = template;
+
+					thisTmp = Handlebars.compile(template);
+					template = thisTmp(data);
+
+					cb(template.makeDocumentFragment());
 				}
 				else console.error('Error loading data');
 			};
@@ -122,13 +114,13 @@ var _get = {
 		var request = new XMLHttpRequest();
 		request.open('GET', url, true);
 		request.onload = function() {
-			if (request.isSuccessful()) {
+			if (request.ajaxIsSuccessful()) {
 				var res = false;
 				try{
 			        res = JSON.parse(request.responseText);
 			    }
 			    catch(e){
-			        console.error('Not a valid JSON response', e);
+			        console.error('Not a valid JSON response from a request made to "'+url+'"', e);
 			    }
 
 			    if(res) cb(res);
@@ -137,7 +129,7 @@ var _get = {
 		};
 
 		request.onerror = function() {
-			alert('Error loading template');
+			alert('Error loading data');
 		};
 
 		request.send();
