@@ -1,0 +1,11 @@
+router flow
+
+add namespaces using this var testNamespace = router.makeNamespace('/test');
+this will add /test to a namespace storage together with the functions that need to get executed when on this namespace
+namespaces are checked before anything else
+
+
+Things to track
+
+Whether any route has been chosen (if not and there is a 404, fire the 404)
+
