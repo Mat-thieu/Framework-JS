@@ -135,7 +135,7 @@ var _get = {
 
 					// Parse the template using Handlebars.js
 					thisTmp = Handlebars.compile(template);
-					template = thisTmp(data);
+					var compiledTemplate = thisTmp(data);
 
 					if(frameworkSettings.localstorageCaching.enabled){
 						var templates = JSON.parse(localStorage.getItem('templates'));
@@ -143,7 +143,7 @@ var _get = {
 						localStorage.setItem('templates', JSON.stringify(templates));
 					}
 
-					cb(template.makeDocumentFragment());
+					cb(compiledTemplate.makeDocumentFragment());
 				}
 				else console.error('Error loading data');
 			};
