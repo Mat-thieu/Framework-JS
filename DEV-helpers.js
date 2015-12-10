@@ -6,15 +6,15 @@
 // 	enumerable: false
 // });
 
-var frameworkDebugNotice =  ' __________________ \n' +
-							'|                  | \n'+
-							'|   FRAMEWORK.JS   | \n'+
-							'|                  | \n'+
-							'|    Debug mode    | \n'+
-							'|    not suited    | \n'+
-							'|  for production  | \n'+
-							'|                  |\n'+
-							'|__________________|'
+var frameworkDebugNotice =  '     __________________  \n' +
+							'    |                  | \n'+
+							'    |   FRAMEWORK.JS   | \n'+
+							'    |                  | \n'+
+							'    |    Debug mode    | \n'+
+							'    |    not suited    | \n'+
+							'    |  for production  | \n'+
+							'    |                  | \n'+
+							'    |__________________| \n \n';
 
 
 Object.prototype.ajaxIsSuccessful = function() {
@@ -37,11 +37,12 @@ String.prototype.isHomeRoute = function(namespace){
 }
 
 var logSubject = function(sub){
+	var space = ' ';
 	var formattedSubject = '';
 	var amountSpaces = (10-sub.length)-1;
 	formattedSubject += sub.toUpperCase()+':';
 	for (var i = 0; i < amountSpaces; i++) {
-		formattedSubject += ' ';
+		formattedSubject += space;
 	};
 
 	return formattedSubject;
