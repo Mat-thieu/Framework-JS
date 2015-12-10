@@ -3,12 +3,12 @@
 **This code is not ready for production**
 
 Simple boilerplate for a javascript framework, includes a feature rich router, built in template/JSON loader and [Handlebars templating engine](http://handlebarsjs.com/).
-It should be easy to get started, there's about a hundred lines of code and it's not super advanced.
+It should be easy to get started, there's less than 200 lines of decently commented code and it's not super advanced.
 
 
 ## Basic usage
 
-Load the script near the bottom of your body.
+Load the script in your head.
 
 ```html
 <script src="framework.js"></script>
@@ -16,12 +16,12 @@ Load the script near the bottom of your body.
 
 Start creating some routes.
 
-```javascript
+```html
 router.listen('/', function(){
 	// Do something when the home route is called
 })
 
-router.listen('/tst/{id}', function(params){
+router.listen('tst/{id}', function(params){
 	// Do something when the url looks like this http://example.com#tst/10
 	// Retrieve the url parameter {id} by using the callback variable params['id']
 	// Note that you can have as many url parameters as you like
@@ -45,7 +45,7 @@ Create a template in the templates folder with some variable entry points
 Now load a template using getTemplate() and inject some data into it.
 
 ```javascript
-router.listen('/tst/{id}', function(params){
+router.listen('tst/{id}', function(params){
 	_get.template('test', // Will look for /templates/test.html
 		{title : 'Epic list', id : params['id']} // Make this data available in the template
 		// The id variable will be equal to whatever you put into the URL (e.g. tst/10 will send 10)
@@ -75,7 +75,7 @@ That's all.
 Retrieve JSON data inside your route
 
 ```javascript
-router.listen('/tst/{id}', function(params){
+router.listen('tst/{id}', function(params){
 	_get.json('api.php?get='+params['id'], function(data){
 		console.log(data)
 	})
@@ -96,9 +96,23 @@ adminRouter.listen('/test', function(){
 
 ```
 
+
 ## Configuration
 
-**--- INDEV ---**
+You can find the config at the first few lines of framework.js
+
+```javascript
+var frameworkSettings = {
+	templateFolder : '/templates',
+	debug : true, // Will log useful debugging information
+	localstorageCaching : {
+		enabled : true,
+		expiration : 0.25 // Amount of hours before a template has to get reloaded (in this case, 15 minutes)
+	}
+}
+
+```
+Note that a template can only expire after the page has been reloaded, it will not expire templates realtime (this has to do with performance).
 
 
 ##Todo and notes
@@ -108,9 +122,7 @@ This script is compatible with all modern browsers (IE 9 and higher).
 I have not looked at security.
 
 **Todo**
-- Add configuration (like the location of your templates, ajax timeouts, etc.)
-- Add deepcache option, will cache the **compiled** template instead of the **raw** template (increases performance)
-- Add option to use localstorage as cache instead of in-memory cache (with a timeout option)
+-
 - Perhaps add a method that first loads JSON and then directly injects it into a given template (this might be too much for a boilerplate script)
 - Reduce number of global variables
 - Resolve conflict when using Object.prototype with jQuery

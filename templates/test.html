@@ -2,8 +2,13 @@
 	<h2>{{title}}</h2>
 	<h5>ID : {{id}}</h5>
 	<ul class="collection">
-	{{#each list}}
-		<li class="collection-item">{{title}}</li>
+	{{#each data.items}}
+		<li class="collection-item">{{this}}</li>
+	{{/each}}
+	</ul>
+	<ul class="collection">
+	{{#each data.other}}
+		<li class="collection-item">{{this}}</li>
 	{{/each}}
 	</ul>
 </div>

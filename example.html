@@ -4,6 +4,9 @@
 	<meta charset="UTF-8">
 	<title>Framework</title>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.2/css/materialize.min.css">
+		<script src="DEV-helpers.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.5/handlebars.min.js"></script>
+	<script src="framework.js"></script>
 </head>
 <body>
 	<div class="container">
@@ -18,85 +21,75 @@
 			</div>
 		</div>
 	</div>
-
-	<script src="DEV-helpers.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.5/handlebars.min.js"></script>
-	<script src="framework.js"></script>
-	<script>
-		// Methods for the sake of this example
-		var _id = function(id){return document.getElementById(id);},
-			_class = function(className){return document.getElementsByClassName(className);},
-			_tag = function(tag){return document.getElementsByTagName(tag);},
-			_query = function(query){return documen.querySelectorAll(query);};
-		Object.defineProperty(Object.prototype, 'on', {
-			value: function(eventName, cb) {
-				if(this.constructor.name == 'HTMLCollection' || this.constructor.name == 'NodeList'){
-					for (var i = this.length - 1; i >= 0; i--) this[i].addEventListener(eventName, function(e){cb(e)}, false);
-				}
-				else this.addEventListener(eventName, function(e){cb(e)}, false);
-			},
-			enumerable: false
-		});
-		Object.prototype.removeChildren = function(){
-			while (this.firstChild) this.removeChild(this.firstChild);
-			return this;
+<script>
+// Methods for the sake of this example
+var _id = function(id){return document.getElementById(id);},
+	_class = function(className){return document.getElementsByClassName(className);},
+	_tag = function(tag){return document.getElementsByTagName(tag);},
+	_query = function(query){return documen.querySelectorAll(query);};
+Object.defineProperty(Object.prototype, 'on', {
+	value: function(eventName, cb) {
+		if(this.constructor.name == 'HTMLCollection' || this.constructor.name == 'NodeList'){
+			for (var i = this.length - 1; i >= 0; i--) this[i].addEventListener(eventName, function(e){cb(e)}, false);
 		}
+		else this.addEventListener(eventName, function(e){cb(e)}, false);
+	},
+	enumerable: false
+});
+Object.prototype.removeChildren = function(){
+	while (this.firstChild) this.removeChild(this.firstChild);
+	return this;
+}
 
-		// Routes
-		router.listen('/', function(){
-			console.log('/ called');
-			_get.template('home', {lorem : "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Cumque, reiciendis."}, function(tmp){
-				_id('output').removeChildren().appendChild(tmp);
-			})
+// Routes
+router.listen('/', function(){
+	_get.template('home', {lorem : "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Cumque, reiciendis."}, function(tmp){
+		_id('output').removeChildren().appendChild(tmp);
+	})
+})
+
+router.listen('/tst/{id}', function(params){
+	_get.json('api.php', function(data){
+		_get.template('test', {title : 'Epic list', id : params['id'], data}, function(tmp){
+			_id('output').removeChildren().appendChild(tmp);
 		})
+	})
+})
 
-		router.listen('/tst/{id}', function(params){
-			console.log('/tst/'+params['id']+' called');
-			_get.json('api.php', function(data){
-				console.log(data);
-			})
-			_get.template('test', {title : 'Epic list', id : params['id'], list : [{title : 'Hello'}, {title : 'World'}, {title : 'Test'}]}, function(tmp){
-				_id('output').removeChildren().appendChild(tmp);
-			})
+router.listen('/compile', function(){
+	_get.json('api.php', function(data){
+		_get.template('engineUpdate', data, function(template){
+			_id('output').removeChildren().appendChild(template);
 		})
+	})
+})
 
-		router.listen('/compile', function(){
-			console.log('/compile called');
-			_get.json('api.php', function(data){
-				_get.template('engineUpdate', data, function(template){
-					_id('output').removeChildren().appendChild(template);
-				})
-			})
-		})
+router.listen('/card/{cardId}', function(params){
+	var cardCount = parseInt(params['cardId'])+1;
 
-		router.listen('/card/{cardId}', function(params){
-			console.log('/card/'+params['cardId']+' called');
-			var cardCount = parseInt(params['cardId'])+1;
+	_get.template('settings',{
+		title : 'Card '+params['cardId']+'!',
+		text : 'Some random text',
+		linkName : 'Next card',
+		cardId : cardCount
+	},
+	function(tmp){
+		_id('output').removeChildren().appendChild(tmp);
+	})
+})
 
-			_get.template('settings',{
-				title : 'Card '+params['cardId']+'!',
-				text : 'Some random text',
-				linkName : 'Next card',
-				cardId : cardCount
-			},
-			function(tmp){
-				_id('output').removeChildren().appendChild(tmp);
-			})
-		})
+var apiRouter = new Router('/api');
 
-		var apiRouter = new Router('/api');
+apiRouter.listen('/tst', function(){
+	console.log('Tst /api');
+})
 
-		apiRouter.listen('/tst', function(){
-			console.log('Tst /api');
-		})
+apiRouter.listen('/', function(){
+	console.log('Home /api');
+})
 
-		apiRouter.listen('/', function(){
-			console.log('Home /api');
-		})
-
-		apiRouter.init();
-		router.init();
-
-	</script>
+apiRouter.init();
+router.init();
+</script>
 </body>
 </html>
