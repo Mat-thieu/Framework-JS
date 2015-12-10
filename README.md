@@ -122,6 +122,12 @@ This script is compatible with all modern browsers (IE 9 and higher).
 I have not looked at security.
 
 **Todo**
+
 - Perhaps add a method that first loads JSON and then directly injects it into a given template (this might be too much for a boilerplate script)
 - Reduce number of global variables
 - Resolve conflict when using Object.prototype with jQuery
+- Create a more efficient router structure (with the addition of namespaces, the current implementation sucks)
+
+At the moment, the router loops over every single available route until it finds a match, with the addition of namespaces it would make sense to first
+determine if the current route points towards a namespace and then only look for a match within in that namespace.
+Besides that, the method of registering a namespace at the moment is clumsy, it also won't allow me to detect 404 in a clean way.
