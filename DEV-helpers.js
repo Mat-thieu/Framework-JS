@@ -37,12 +37,11 @@ String.prototype.isHomeRoute = function(namespace){
 }
 
 var logSubject = function(sub){
-	var space = ' ';
 	var formattedSubject = '';
 	var amountSpaces = (10-sub.length)-1;
 	formattedSubject += sub.toUpperCase()+':';
 	for (var i = 0; i < amountSpaces; i++) {
-		formattedSubject += space;
+		formattedSubject += ' ';
 	};
 
 	return formattedSubject;
