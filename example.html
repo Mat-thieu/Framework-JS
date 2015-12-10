@@ -58,10 +58,8 @@ router.listen('/tst/{id}', function(params){
 })
 
 router.listen('/compile', function(){
-	_get.json('api.php', function(data){
-		_get.template('engineUpdate', data, function(template){
-			_id('output').setHtml(template);
-		})
+	_get.template('engineUpdate', {test : "Hello World"}, function(template){
+		_id('output').setHtml(template);
 	})
 })
 
