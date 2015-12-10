@@ -3,7 +3,7 @@ var frameworkSettings = {
 	debug : true,
 	localstorageCaching : {
 		enabled : true,
-		expiration : 0.25 // Amount of hours before a template has to get reloaded (in this case, 15 minutes)
+		expiration : 0.25 // Hours
 	}
 }
 
@@ -19,10 +19,13 @@ var frameworkInit = function(){
 		else{
 			var templates = JSON.parse(templateStorage);
 			for(key in templates){
+				// Only add templates that haven't expired
 				if(templates[key]['expires'] >= Math.floor(Date.now()/1000)) frameworkCache.templates[key] = templates[key]['template'];
 			}
 		}
 	}
+
+	if(frameworkSettings.debug) console.info(frameworkDebugNotice);
 }();
 
 var Router = function(namespace){
@@ -45,7 +48,7 @@ Router.prototype = {
 			this.routes.push({route : routeName, cb : func, params : strippedRouterParams});
 		}
 
-		if(frameworkSettings.debug) console.log('ROUTER:   Listening on route', this.namespace+routeName);
+		if(frameworkSettings.debug) console.log(logSubject('router')+'Listening on route', this.namespace+routeName);
 	},
 	// Analyze the given hash and try to find a matching route, if it matches, fire the route's callback function
 	analyzeHash : function(hash){
@@ -85,7 +88,7 @@ Router.prototype = {
 		// Search for a homeroute and make it easily available for the analyze method
 		this.routes.forEach(function(val, ind){
 			if(val['route'] == '/'){
-				if(frameworkSettings.debug) console.log('ROUTER:   Homeroute available ', (self.namespace !== "" ? "("+self.namespace+" namespace)" : "(/ namespace)"));
+				if(frameworkSettings.debug) console.log(logSubject('router')+'Homeroute available ', (self.namespace !== "" ? "("+self.namespace+" namespace)" : "(/ namespace)"));
 				self.indexroute.available = true;
 				self.indexroute.index = ind;
 			}
@@ -95,7 +98,7 @@ Router.prototype = {
 
 		// Add hashchange listener
 		window.onhashchange = function(){
-			if(frameworkSettings.debug) console.log('URL:      Hashchange triggered');
+			if(frameworkSettings.debug) console.log(logSubject('url')+'Hashchange triggered');
 			self.analyzeHash(window.location.hash);
 		}
 	}
@@ -121,7 +124,7 @@ var _get = {
 			cb(thisTmp(data).makeDocumentFragment());
 		}
 		else{
-			if(frameworkSettings.debug) console.log('AJAX:     Retrieving template from server');
+			if(frameworkSettings.debug) console.log(logSubject('ajax')+'Retrieving template from server');
 			var request = new XMLHttpRequest();
 			request.open('GET', frameworkSettings.templateFolder+'/'+name+'.html', true);
 			request.onload = function() {
@@ -157,7 +160,7 @@ var _get = {
 		request.open('GET', url, true);
 		request.onload = function() {
 			if (request.ajaxIsSuccessful()) {
-				if(frameworkSettings.debug) console.log('AJAX:     Retrieving JSON from server');
+				if(frameworkSettings.debug) console.log(logSubject('ajax')+'Retrieving JSON from server');
 				var res = false;
 				// Check whether the JSON is valid
 				try{

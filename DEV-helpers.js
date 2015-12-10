@@ -6,6 +6,17 @@
 // 	enumerable: false
 // });
 
+var frameworkDebugNotice =  ' __________________ \n' +
+							'|                  | \n'+
+							'|   FRAMEWORK.JS   | \n'+
+							'|                  | \n'+
+							'|    Debug mode    | \n'+
+							'|    not suited    | \n'+
+							'|  for production  | \n'+
+							'|                  |\n'+
+							'|__________________|'
+
+
 Object.prototype.ajaxIsSuccessful = function() {
 	if (this.status == undefined) return false;
 	return this.status >= 200 && this.status < 400;
@@ -23,4 +34,16 @@ String.prototype.makeDocumentFragment = function(){
 String.prototype.isHomeRoute = function(namespace){
 	if(this == '#'+(namespace !== '' ? namespace+'/' : '/') || this == '#'+(namespace !== '' ? namespace : '') || this == '') return true;
 	else return false;
+}
+
+var logSubject = function(sub){
+	var space = ' ';
+	var formattedSubject = '';
+	var amountSpaces = (10-sub.length)-1;
+	formattedSubject += sub.toUpperCase()+':';
+	for (var i = 0; i < amountSpaces; i++) {
+		formattedSubject += space;
+	};
+
+	return formattedSubject;
 }
