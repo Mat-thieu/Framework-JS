@@ -123,7 +123,7 @@ var _get = {
 		else{
 			if(frameworkSettings.debug) console.log('AJAX:     Retrieving template from server');
 			var request = new XMLHttpRequest();
-			request.open('GET', frameworkSettings.templateLocation+'/'+name+'.html', true);
+			request.open('GET', frameworkSettings.templateFolder+'/'+name+'.html', true);
 			request.onload = function() {
 				if (request.ajaxIsSuccessful()) {
 					var template = request.responseText;
