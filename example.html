@@ -13,8 +13,8 @@
 		<div class="row">
 			<div class="col s12">
 				<h2>Framework</h2>
-				<a href="#/" class="ts">Home</a><br>
-				<a href="#/tst/10" class="ts">Test</a><br>
+				<a href="#/">Home</a><br>
+				<a href="#/tst/10">Test</a><br>
 				<a href="#/card/1">Settings</a><br>
 				<a href="#/compile">Compile</a>
 				<div id="output"></div>
@@ -27,31 +27,32 @@ var _id = function(id){return document.getElementById(id);},
 	_class = function(className){return document.getElementsByClassName(className);},
 	_tag = function(tag){return document.getElementsByTagName(tag);},
 	_query = function(query){return documen.querySelectorAll(query);};
-Object.defineProperty(Object.prototype, 'on', {
-	value: function(eventName, cb) {
-		if(this.constructor.name == 'HTMLCollection' || this.constructor.name == 'NodeList'){
-			for (var i = this.length - 1; i >= 0; i--) this[i].addEventListener(eventName, function(e){cb(e)}, false);
-		}
-		else this.addEventListener(eventName, function(e){cb(e)}, false);
-	},
-	enumerable: false
-});
-Object.prototype.removeChildren = function(){
-	while (this.firstChild) this.removeChild(this.firstChild);
-	return this;
-}
+	Object.defineProperty(Object.prototype, 'on', {
+		value: function(eventName, cb) {
+			if(this.constructor.name == 'HTMLCollection' || this.constructor.name == 'NodeList'){
+				for (var i = this.length - 1; i >= 0; i--) this[i].addEventListener(eventName, function(e){cb(e)}, false);
+			}
+			else this.addEventListener(eventName, function(e){cb(e)}, false);
+		},
+		enumerable: false
+	});
+	Object.prototype.setHtml = function(frag){
+		while (this.firstChild) this.removeChild(this.firstChild);
+		this.appendChild(frag);
+		return this;
+	}
 
 // Routes
 router.listen('/', function(){
 	_get.template('home', {lorem : "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Cumque, reiciendis."}, function(tmp){
-		_id('output').removeChildren().appendChild(tmp);
+		_id('output').setHtml(tmp);
 	})
 })
 
 router.listen('/tst/{id}', function(params){
 	_get.json('api.php', function(data){
 		_get.template('test', {title : 'Epic list', id : params['id'], data}, function(tmp){
-			_id('output').removeChildren().appendChild(tmp);
+			_id('output').setHtml(tmp);
 		})
 	})
 })
@@ -59,7 +60,7 @@ router.listen('/tst/{id}', function(params){
 router.listen('/compile', function(){
 	_get.json('api.php', function(data){
 		_get.template('engineUpdate', data, function(template){
-			_id('output').removeChildren().appendChild(template);
+			_id('output').setHtml(template);
 		})
 	})
 })
@@ -74,7 +75,7 @@ router.listen('/card/{cardId}', function(params){
 		cardId : cardCount
 	},
 	function(tmp){
-		_id('output').removeChildren().appendChild(tmp);
+		_id('output').setHtml(tmp);
 	})
 })
 
