@@ -1,6 +1,6 @@
 #Framework JS
 
-**This code is not ready for production**
+**This code is not ready for production, yet**
 
 Simple boilerplate for a javascript framework, includes a feature rich router, built in template/JSON loader and [Handlebars templating engine](http://handlebarsjs.com/).
 It should be easy to get started, there's less than 200 lines of decently commented code and it's not super advanced.
@@ -13,6 +13,8 @@ Load the script in your head.
 ```html
 <script src="framework.js"></script>
 ```
+
+Add the <main-view></main-view> tag somewhere in your HTML, the setView() function will output here
 
 Start creating some routes.
 
@@ -50,8 +52,8 @@ router.listen('/tst/{id}', function(params){
 		{title : 'Epic list', id : params['id']} // Make this data available in the template
 		// The id variable will be equal to whatever you put into the URL (e.g. tst/10 will send 10)
 	, function(tmp){
-		// Insert the data into the DOM
-		_id('output').removeChildren().appendChild(tmp);
+		// Insert the data into <main-view></main-view>
+		setView(tmp);
 	})
 })
 ```
@@ -70,7 +72,7 @@ Perhaps add a link to your route
 That's all.
 
 
-## Other methods
+## Other method(s)
 
 Retrieve JSON data inside your route
 
@@ -81,21 +83,6 @@ router.listen('/tst/{id}', function(params){
 	})
 })
 ```
-
-By default, the **router** variable will be available for creating routes, to create a namespace, call a new Router instance
-
-```javascript
-// This might change in the next release
-var adminRouter = new Router('/admin');
-
-// Now create a new route
-
-adminRouter.listen('/test', function(){
-	// Will listen to #/admin/test
-})
-
-```
-
 
 ## Configuration
 
@@ -127,6 +114,7 @@ I have not looked at security.
 - Reduce number of global variables
 - Resolve conflict when using Object.prototype with jQuery
 - Create a more efficient router structure (with the addition of namespaces, the current implementation sucks)
+- Create multi template getter, perhaps a multi data injector as well
 
 At the moment, the router loops over every single available route until it finds a match, with the addition of namespaces it would make sense to first
 determine if the current route points towards a namespace and then only look for a match within in that namespace.

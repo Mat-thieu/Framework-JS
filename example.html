@@ -4,7 +4,7 @@
 	<meta charset="UTF-8">
 	<title>Framework</title>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.2/css/materialize.min.css">
-		<script src="DEV-helpers.js"></script>
+	<script src="DEV-helpers.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.5/handlebars.min.js"></script>
 	<script src="framework.js"></script>
 </head>
@@ -16,8 +16,8 @@
 				<a href="#/">Home</a><br>
 				<a href="#/tst/10">Test</a><br>
 				<a href="#/card/1">Settings</a><br>
-				<a href="#/compile">Compile</a>
-				<div id="output"></div>
+				<a href="#/doubleTemplate">Multi template</a>
+				<main-view></main-view>
 			</div>
 		</div>
 	</div>
@@ -27,6 +27,7 @@ var _id = function(id){return document.getElementById(id);},
 	_class = function(className){return document.getElementsByClassName(className);},
 	_tag = function(tag){return document.getElementsByTagName(tag);},
 	_query = function(query){return documen.querySelectorAll(query);};
+
 	Object.defineProperty(Object.prototype, 'on', {
 		value: function(eventName, cb) {
 			if(this.constructor.name == 'HTMLCollection' || this.constructor.name == 'NodeList'){
@@ -36,30 +37,25 @@ var _id = function(id){return document.getElementById(id);},
 		},
 		enumerable: false
 	});
-	Object.prototype.setHtml = function(frag){
-		while (this.firstChild) this.removeChild(this.firstChild);
-		this.appendChild(frag);
-		return this;
-	}
 
 // Routes
 router.listen('/', function(){
 	_get.template('home', {lorem : "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Cumque, reiciendis."}, function(tmp){
-		_id('output').setHtml(tmp);
+		setView(tmp);
 	})
 })
 
 router.listen('/tst/{id}', function(params){
 	_get.json('api.php', function(data){
-		_get.template('test', {title : 'Epic list', id : params['id'], data}, function(tmp){
-			_id('output').setHtml(tmp);
+		_get.template('test', {title : 'Epic list', id : params['id'], data : data}, function(tmp){
+			setView(tmp);
 		})
 	})
 })
 
 router.listen('/compile', function(){
 	_get.template('engineUpdate', {test : "Hello World"}, function(template){
-		_id('output').setHtml(template);
+		setView(template);
 	})
 })
 
@@ -73,21 +69,18 @@ router.listen('/card/{cardId}', function(params){
 		cardId : cardCount
 	},
 	function(tmp){
-		_id('output').setHtml(tmp);
+		setView(tmp);
 	})
 })
 
-var apiRouter = new Router('/api');
-
-apiRouter.listen('/tst', function(){
-	console.log('Tst /api');
+router.listen('/doubleTemplate', function(){
+	_get.template('home', {lorem : "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Cumque, reiciendis."}, function(tmp){
+		_get.template('engineUpdate', {test : "Hello World"}, function(template){
+			setView(template, tmp);
+		})
+	})
 })
 
-apiRouter.listen('/', function(){
-	console.log('Home /api');
-})
-
-apiRouter.init();
 router.init();
 </script>
 </body>

@@ -28,8 +28,7 @@ var frameworkInit = function(){
 	if(frameworkSettings.debug) console.info(frameworkDebugNotice);
 }();
 
-var Router = function(namespace){
-	this.namespace = namespace;
+var Router = function(){
 	this.routes = [];
 	this.indexroute = {available : false, index : 0};
 }
@@ -48,12 +47,12 @@ Router.prototype = {
 			this.routes.push({route : routeName, cb : func, params : strippedRouterParams});
 		}
 
-		if(frameworkSettings.debug) console.log(logSubject('router')+'Listening on route', this.namespace+routeName);
+		if(frameworkSettings.debug) console.log(logSubject('router')+'Listening on route', routeName);
 	},
 	// Analyze the given hash and try to find a matching route, if it matches, fire the route's callback function
 	analyzeHash : function(hash){
 		// Handle the indexroute ("/"), this has to happen first (because the regex won't catch it)
-		if(this.indexroute.available && hash.isHomeRoute(this.namespace)){
+		if(this.indexroute.available && hash.isHomeRoute()){
 			this.routes[this.indexroute.index]['cb']();
 			return false;
 		}
@@ -61,7 +60,7 @@ Router.prototype = {
 			var self = this;
 			// Find a matching route
 			this.routes.forEach(function(val, ind){
-				var route = "#"+(self.namespace !== '' ? self.namespace : "")+val['route'];
+				var route = "#"+val['route'];
 				var routeMatcher = new RegExp(route.replace(/{[^\s/]+}/g, '([\\w-]+)'));
 
 				var match = hash.match(routeMatcher);
@@ -88,7 +87,7 @@ Router.prototype = {
 		// Search for a homeroute and make it easily available for the analyze method
 		this.routes.forEach(function(val, ind){
 			if(val['route'] == '/'){
-				if(frameworkSettings.debug) console.log(logSubject('router')+'Homeroute available ', (self.namespace !== "" ? "("+self.namespace+" namespace)" : "(/ namespace)"));
+				if(frameworkSettings.debug) console.log(logSubject('router')+'Homeroute available');
 				self.indexroute.available = true;
 				self.indexroute.index = ind;
 			}
@@ -105,7 +104,7 @@ Router.prototype = {
 }
 
 // Register the default router
-var router = new Router('');
+var router = new Router();
 
 // Some basic get methods
 var _get = {
@@ -137,6 +136,7 @@ var _get = {
 					thisTmp = Handlebars.compile(template);
 					var compiledTemplate = thisTmp(data);
 
+					// Store the template in localstorage if it's enabled
 					if(frameworkSettings.localstorageCaching.enabled){
 						var templates = JSON.parse(localStorage.getItem('templates'));
 						templates[name] = {template : template, expires : Math.floor(Date.now() /1000)+(frameworkSettings.localstorageCaching.expiration*60*60)};
@@ -145,11 +145,11 @@ var _get = {
 
 					cb(compiledTemplate.makeDocumentFragment());
 				}
-				else console.error('Error loading data');
+				else console.error('Error loading template');
 			};
 
 			request.onerror = function() {
-				alert('Error loading template');
+				console.error('Error loading template');
 			};
 
 			request.send();
@@ -176,7 +176,7 @@ var _get = {
 		};
 
 		request.onerror = function() {
-			alert('Error loading data');
+			console.error('Error loading data');
 		};
 
 		request.send();
