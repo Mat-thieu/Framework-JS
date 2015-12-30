@@ -8,13 +8,13 @@ It should be easy to get started, there's less than 200 lines of decently commen
 
 ## Basic usage
 
-Load the script in your head.
+Load the script in between your head tags.
 
 ```html
 <script src="framework.js"></script>
 ```
 
-Add the <main-view></main-view> tag somewhere in your HTML, the setView() function will output here
+Add the '''html <main-view></main-view>''' tag somewhere in your body, the setView() function will output view content in there.
 
 Start creating some routes.
 
@@ -24,7 +24,7 @@ router.listen('/', function(){
 })
 
 router.listen('/tst/{id}', function(params){
-	// Do something when the url looks like this http://example.com#tst/10
+	// Do something when the url looks like this http://example.com#/tst/10
 	// Retrieve the url parameter {id} by using the callback variable params['id']
 	// Note that you can have as many url parameters as you like
 })
@@ -44,7 +44,7 @@ Create a template in the templates folder with some variable entry points
 </div>
 ```
 
-Now load a template using getTemplate() and inject some data into it.
+Now load a template using _get.template() and inject some data into it.
 
 ```javascript
 router.listen('/tst/{id}', function(params){
@@ -69,12 +69,9 @@ Perhaps add a link to your route
 <a href="#/tst/10">Test</a>
 ```
 
-That's all.
-
-
 ## Other method(s)
 
-Retrieve JSON data inside your route
+Retrieve JSON data
 
 ```javascript
 router.listen('/tst/{id}', function(params){
@@ -99,10 +96,10 @@ var frameworkSettings = {
 }
 
 ```
-Note that a template can only expire after the page has been reloaded, it will not expire templates realtime (this has to do with performance).
+Note that a template can only expire after the page has been reloaded, it will not expire templates realtime (out of performance concerns).
 
 
-##Todo and notes
+## Todo and notes
 
 This script is compatible with all modern browsers (IE 9 and higher).
 
@@ -115,6 +112,7 @@ I have not looked at security.
 - Resolve conflict when using Object.prototype with jQuery
 - Create a more efficient router structure (with the addition of namespaces, the current implementation sucks)
 - Create multi template getter, perhaps a multi data injector as well
+- Perhaps add a data caching option as well, decreasing the amount of requests is kind of the point of a javascript framework.
 
 At the moment, the router loops over every single available route until it finds a match, with the addition of namespaces it would make sense to first
 determine if the current route points towards a namespace and then only look for a match within in that namespace.
