@@ -2,7 +2,7 @@
 
 **This code is not ready for production, yet**
 
-Simple boilerplate for a javascript framework, includes a feature rich router, built in template/JSON loader and [Handlebars templating engine](http://handlebarsjs.com/).
+Micro Javascript framework, includes a feature rich router, built in template/JSON loader and [Handlebars templating engine](http://handlebarsjs.com/).
 It should be easy to get started, there's less than 300 lines of decently commented code and it's not super advanced.
 
 
