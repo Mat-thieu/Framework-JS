@@ -132,15 +132,7 @@ var router = new Namespace('');
 // Some basic get methods
 var _get = {
 	template : function(name, data, cb){
-		name = name || false;
-		data = data || false;
-
-		if(!name){
-			console.error('No template specified');
-			cb();
-			return false;
-		}
-		else if(name in frameworkCache.templates){
+		if(name in frameworkCache.templates){
 			// If a template has been stored in cache, load it from there
 			var thisTmp = Handlebars.compile(frameworkCache.templates[name]);
 			cb(thisTmp(data).makeDocumentFragment());
@@ -179,11 +171,8 @@ var _get = {
 		}
 	},
 	templates : function(templates, data, cb){
-		templates = templates || false;
-		data = data || false;
-
-		if(!templates){
-			console.error('No templates specified');
+		if(!Array.isArray(templates)){
+			console.error('Please specify an array of templates');
 			cb();
 			return false;
 		}
@@ -268,9 +257,7 @@ var _view = {
 		var view = document.getElementsByTagName('main-view')[0];
 		view.innerHTML = '';
 		if(arguments[0] !== ''){
-			for (var i = 0; i < arguments.length; i++) {
-				view.appendChild(arguments[i]);
-			};
+			for (var i = 0; i < arguments.length; i++) view.appendChild(arguments[i]);
 		}
 	}
 }
