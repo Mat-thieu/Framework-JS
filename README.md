@@ -8,30 +8,28 @@ It should be easy to get started, there's less than 200 lines of decently commen
 
 ## Basic usage
 
-Load the script in between your head tags.
+Load the script in your head.
 
 ```html
 <script src="framework.js"></script>
 ```
 
-Add the '''html <main-view></main-view>''' tag somewhere in your body, the setView() function will output view content in there.
+Add the main-view tag somewhere in your HTML, the _view.set() method will output your templates within that tag
 
 Start creating some routes.
-
 ```javascript
 router.listen('/', function(){
 	// Do something when the home route is called
 })
 
 router.listen('/tst/{id}', function(params){
-	// Do something when the url looks like this http://example.com#/tst/10
+	// Do something when the url looks like this http://example.com#tst/10
 	// Retrieve the url parameter {id} by using the callback variable params['id']
 	// Note that you can have as many url parameters as you like
 })
 ```
 
-Create a template in the templates folder with some variable entry points
-
+Create a template in the templates folder with some variable entry points (surround the variable in double brackets, [Handlebars](http://handlebarsjs.com/) )
 ```html
 <!-- /templates/test.html -->
 <div class="card-panel">
@@ -44,62 +42,82 @@ Create a template in the templates folder with some variable entry points
 </div>
 ```
 
-Now load a template using _get.template() and inject some data into it.
-
+Now load a template using _get.template([name], [dataToInject], [callback]) and inject some data into it.
 ```javascript
 router.listen('/tst/{id}', function(params){
 	_get.template('test', // Will look for /templates/test.html
 		{title : 'Epic list', id : params['id']} // Make this data available in the template
 		// The id variable will be equal to whatever you put into the URL (e.g. tst/10 will send 10)
 	, function(tmp){
-		// Insert the data into <main-view></main-view>
-		setView(tmp);
+		// Insert the data into main-view
+		_view.set(tmp);
 	})
 })
 ```
 
-After all your routes, make sure to call this function
-
+After you've created all your routes, initialize the framework,
 ```javascript
-router.init();
+Framework.init({
+	templateFolder : '/templates',
+	debug : true,
+	localstorageCaching : { // This will only cache the raw templates, JSON data will always be fresh from the server
+		enabled : true,
+		expiration : 0.25 // Hours
+	}
+});
 ```
+_NOTE: In the current version of the framework these options are required, you can turn them on or off though._
 
-Perhaps add a link to your route
+Link to one of your routes like so
 ```html
 <a href="#/tst/10">Test</a>
 ```
 
-## Other method(s)
+Those are the basics.
 
-Retrieve JSON data
+## Other methods
 
+Retrieve JSON data inside your route
 ```javascript
-router.listen('/tst/{id}', function(params){
+router.listen('/example/{id}', function(params){
 	_get.json('api.php?get='+params['id'], function(data){
 		console.log(data)
 	})
 })
 ```
 
-## Configuration
-
-You can find the config at the first few lines of framework.js
-
+Get multiple templates and inject some JSON into them (this is faster than retrieving both seperately).
 ```javascript
-var frameworkSettings = {
-	templateFolder : '/templates',
-	debug : true, // Will log useful debugging information
-	localstorageCaching : {
-		enabled : true,
-		expiration : 0.25 // Amount of hours before a template has to get reloaded (in this case, 15 minutes)
-	}
-}
-
+router.listen('/example', function(){
+	_get.templates(
+		['home', 'engineUpdate'], // Define which templates to load
+		{lorem : "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Cumque, reiciendis.", test : "Hello World"},
+	function(res){
+		// Ordering matters here, the data will be injected into both templates
+		_view.set(res['engineUpdate'], res['home']);
+	})
+})
 ```
-Note that a template can only expire after the page has been reloaded, it will not expire templates realtime (out of performance concerns).
+
+404 route
+```javascript
+Framework.on('404', function(){
+	_view.set(notFoundHtml);
+})
+```
+
+Create a namespace
+```javascript
+var exampleRouter = new Namespace('/example');
+
+exampleRouter.listen('/one', function(){
+	console.log('/example/one has been visited!');
+})
+```
+_Use namespaces wherever possible, these contribute to better performance because you're practically creating indexes._
 
 
-## Todo and notes
+##Todo and notes
 
 This script is compatible with all modern browsers (IE 9 and higher).
 
@@ -108,12 +126,6 @@ I have not looked at security.
 **Todo**
 
 - Perhaps add a method that first loads JSON and then directly injects it into a given template (this might be too much for a boilerplate script)
-- Reduce number of global variables
-- Resolve conflict when using Object.prototype with jQuery
-- Create a more efficient router structure (with the addition of namespaces, the current implementation sucks)
-- Create multi template getter, perhaps a multi data injector as well
-- Perhaps add a data caching option as well, decreasing the amount of requests is kind of the point of a javascript framework.
+- ~~Create multi template getter~~, perhaps a multi data injector as well
+- The regex that matches the routes needs some improvement, it's causing some unexpected behaviour in very specific cases.
 
-At the moment, the router loops over every single available route until it finds a match, with the addition of namespaces it would make sense to first
-determine if the current route points towards a namespace and then only look for a match within in that namespace.
-Besides that, the method of registering a namespace at the moment is clumsy, it also won't allow me to detect 404 in a clean way.

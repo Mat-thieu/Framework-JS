@@ -31,11 +31,6 @@ String.prototype.makeDocumentFragment = function(){
     return frag;
 }
 
-String.prototype.isHomeRoute = function(){
-	if(this == '#/' || this == '#' || this == '') return true;
-	else return false;
-}
-
 var logSubject = function(sub){
 	// Prepend the subject before the console log, make it allcaps and always 10 characters long
 	var formattedSubject = '';
@@ -46,12 +41,4 @@ var logSubject = function(sub){
 	};
 
 	return formattedSubject;
-}
-
-var setView = function(){
-	var view = document.getElementsByTagName('main-view')[0];
-	while (view.firstChild) view.removeChild(view.firstChild);
-	for (var i = 0; i < arguments.length; i++) {
-		view.appendChild(arguments[i]);
-	};
 }

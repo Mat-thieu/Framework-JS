@@ -1,110 +1,133 @@
 var frameworkSettings = {
-	templateFolder : '/templates',
-	debug : true,
-	localstorageCaching : {
-		enabled : true,
-		expiration : 0.25 // Hours
-	}
-}
+	debug : true
+};
 
 var frameworkCache = {
-	templates : {}
+	templates : {},
+	namespaceRoutes : {},
+	registeredNamespaces : [],
+	events : []
 }
 
-// Applying settings, this function fires itself
-var frameworkInit = function(){
-	if(frameworkSettings.localstorageCaching.enabled){
-		var templateStorage = localStorage.getItem('templates');
-		if(templateStorage == null) localStorage.setItem('templates', JSON.stringify({}));
-		else{
-			var templates = JSON.parse(templateStorage);
-			for(key in templates){
-				// Only add templates that haven't expired
-				if(templates[key]['expires'] >= Math.floor(Date.now()/1000)) frameworkCache.templates[key] = templates[key]['template'];
-			}
-		}
-	}
-
-	if(frameworkSettings.debug) console.info(frameworkDebugNotice);
-}();
-
-var Router = function(){
-	this.routes = [];
-	this.indexroute = {available : false, index : 0};
-}
-
-Router.prototype = {
-	// Register a route
-	listen : function(routeName, func){
-		// Retrieve all router parameters (e.g. input /test/{id} would find {id})
-		var routerParams = routeName.match(/{([^{}]+)}/g, "$1");
-		if(routerParams == null) this.routes.push({route : routeName, cb : func, params : {}});
-		else{
-			// If there are parameters, strip the brackets and store in the routes
-		    var strippedRouterParams = [];
-		    for (var i = 0; i < routerParams.length; i++) strippedRouterParams.push(routerParams[i].replace('{', '').replace('}', ''));
-
-			this.routes.push({route : routeName, cb : func, params : strippedRouterParams});
-		}
-
-		if(frameworkSettings.debug) console.log(logSubject('router')+'Listening on route', routeName);
-	},
-	// Analyze the given hash and try to find a matching route, if it matches, fire the route's callback function
+var Framework = {
+	// Analyze the given hash and try to find a matching route, if it matches, fire the route's callback
 	analyzeHash : function(hash){
 		// Handle the indexroute ("/"), this has to happen first (because the regex won't catch it)
-		if(this.indexroute.available && hash.isHomeRoute()){
-			this.routes[this.indexroute.index]['cb']();
+		if(hash == '#/' || hash == '#' || hash == ''){
+			frameworkCache.namespaceRoutes['index']['cb']();
 			return false;
 		}
 		else{
-			var self = this;
-			// Find a matching route
-			this.routes.forEach(function(val, ind){
-				var route = "#"+val['route'];
-				var routeMatcher = new RegExp(route.replace(/{[^\s/]+}/g, '([\\w-]+)'));
+			var foundMatch = false;
+			var matchRoute = function(namespace){
+				// Find a matching route within the namespace
+				var fixedNamespace = namespace;
+				if(namespace == 'default') fixedNamespace = '';
 
-				var match = hash.match(routeMatcher);
+				frameworkCache.namespaceRoutes[namespace].some(function(routeVal, routeInd){
+					var route = "#"+fixedNamespace+routeVal['route'];
+					var routeMatcher = new RegExp(route.replace(/{[^\s/]+}/g, '([\\w-]+)'));
 
-				if(match){
-					var params = {};
-					// Handle a case with and without parameters
-					if(val['params'].length !== 0 && Array.isArray(val['params'])){
-						val['params'].forEach(function(pVal, pInd){
-							params[pVal] = match[pInd+1];
-						})
-						val['cb'](params);
+					var match = hash.match(routeMatcher);
+
+					if(match){
+						var params = {};
+						// Handle a case with and without parameters
+						foundMatch = true;
+						if(routeVal['params'].length !== 0 && Array.isArray(routeVal['params'])){
+							routeVal['params'].forEach(function(pVal, pInd){
+								params[pVal] = match[pInd+1];
+							})
+							routeVal['cb'](params);
+							return true;
+						}
+						else{
+							 routeVal['cb']();
+							 return true;
+						}
 					}
-					else if(val['route'] !== '/'){
-						 val['cb']();
-					}
+				})
+			}
+			// Find a matching namespace
+			frameworkCache.registeredNamespaces.some(function(namespace, ind){
+				var nsLength = namespace.length+1;
+				if(hash.substring(1, nsLength) == namespace){
+					// A namespace matched the URL
+					matchRoute(namespace);
+					return true;
 				}
 			})
+
+			if(!foundMatch) matchRoute('default');
+
+			if(!foundMatch){
+				if('404' in frameworkCache.events) frameworkCache.events['404']();
+				else if(frameworkSettings.debug) console.log(logSubject('404')+'No 404 event available');
+			}
 		}
 	},
-	// Add hashchange listener and check if an indexroute got registered
-	init : function(){
-		var self = this;
-		// Search for a homeroute and make it easily available for the analyze method
-		this.routes.forEach(function(val, ind){
-			if(val['route'] == '/'){
-				if(frameworkSettings.debug) console.log(logSubject('router')+'Homeroute available');
-				self.indexroute.available = true;
-				self.indexroute.index = ind;
+	on : function(eventName, cb){
+		frameworkCache.events[eventName] = cb;
+	},
+	init : function(settings){
+		frameworkSettings = settings;
+		if(settings.localstorageCaching.enabled){
+			var templateStorage = localStorage.getItem('templates');
+			if(templateStorage == null) localStorage.setItem('templates', JSON.stringify({}));
+			else{
+				var templates = JSON.parse(templateStorage);
+				for(key in templates){
+					// Only add templates that haven't expired to the memcahce
+					if(templates[key]['expires'] >= Math.floor(Date.now()/1000)) frameworkCache.templates[key] = templates[key]['template'];
+				}
 			}
-		})
-		// Fire the analyze method for the first time
-		this.analyzeHash(window.location.hash);
+		}
 
-		// Add hashchange listener
+		Framework.analyzeHash(window.location.hash);
 		window.onhashchange = function(){
 			if(frameworkSettings.debug) console.log(logSubject('url')+'Hashchange triggered');
-			self.analyzeHash(window.location.hash);
+			Framework.analyzeHash(window.location.hash);
 		}
 	}
 }
 
-// Register the default router
-var router = new Router();
+var Namespace = function(namespace){
+	if(namespace == ''){
+		this.namespace = 'default';
+		this.isDefault = true;
+	}
+	else{
+		this.namespace = namespace;
+		this.isDefault = false;
+	}
+	frameworkCache.namespaceRoutes[this.namespace] = [];
+	frameworkCache.registeredNamespaces.push(this.namespace);
+}
+
+Namespace.prototype = {
+	// Register a route
+	listen : function(routeName, func){
+		var thisCache = frameworkCache.namespaceRoutes[this.namespace];
+		// Retrieve all router parameters (e.g. input /test/{id} would find {id})
+		if(routeName == '/' && this.isDefault)frameworkCache.namespaceRoutes['index'] = {cb : func, params : {}};
+		else{
+			var routerParams = routeName.match(/{([^{}]+)}/g, "$1");
+			if(routerParams == null) thisCache.push({route : routeName, cb : func, params : {}});
+			else{
+				// If there are parameters, strip the brackets and store in the routes
+			    var strippedRouterParams = [];
+			    for (var i = 0; i < routerParams.length; i++) strippedRouterParams.push(routerParams[i].replace('{', '').replace('}', ''));
+
+				thisCache.push({route : routeName, cb : func, params : strippedRouterParams});
+			}
+		}
+
+		if(frameworkSettings.debug) console.log(logSubject('router')+'Listening on route', this.namespace+routeName);
+	}
+}
+
+// Register the default namespace
+var router = new Namespace('');
 
 // Some basic get methods
 var _get = {
@@ -136,7 +159,7 @@ var _get = {
 					thisTmp = Handlebars.compile(template);
 					var compiledTemplate = thisTmp(data);
 
-					// Store the template in localstorage if it's enabled
+					// Store the template in localstorage, if it's enabled
 					if(frameworkSettings.localstorageCaching.enabled){
 						var templates = JSON.parse(localStorage.getItem('templates'));
 						templates[name] = {template : template, expires : Math.floor(Date.now() /1000)+(frameworkSettings.localstorageCaching.expiration*60*60)};
@@ -153,6 +176,63 @@ var _get = {
 			};
 
 			request.send();
+		}
+	},
+	templates : function(templates, data, cb){
+		templates = templates || false;
+		data = data || false;
+
+		if(!templates){
+			console.error('No templates specified');
+			cb();
+			return false;
+		}
+		else{
+			var loadState = {toLoad : templates.length, loaded : 0, templates : {}};
+
+			templates.forEach(function(name, ind){
+				loadState.templates[name] = '';
+				if(name in frameworkCache.templates){
+					var thisTmp = Handlebars.compile(frameworkCache.templates[name]);
+					loadState.templates[name] = thisTmp(data).makeDocumentFragment();
+					loadState.loaded++;
+					if(loadState.loaded == loadState.toLoad) cb(loadState.templates);
+				}
+				else{
+					if(frameworkSettings.debug) console.log(logSubject('ajax')+'Retrieving template from server');
+					var request = new XMLHttpRequest();
+					request.open('GET', frameworkSettings.templateFolder+'/'+name+'.html', true);
+					request.onload = function() {
+						if (request.ajaxIsSuccessful()) {
+							var template = request.responseText;
+							// Add the template to the cache object
+							frameworkCache.templates[name] = template;
+
+							// Parse the template using Handlebars.js
+							thisTmp = Handlebars.compile(template);
+							var compiledTemplate = thisTmp(data);
+
+							// Store the template in localstorage if it's enabled
+							if(frameworkSettings.localstorageCaching.enabled){
+								var templates = JSON.parse(localStorage.getItem('templates'));
+								templates[name] = {template : template, expires : Math.floor(Date.now() /1000)+(frameworkSettings.localstorageCaching.expiration*60*60)};
+								localStorage.setItem('templates', JSON.stringify(templates));
+							}
+
+							loadState.templates[name] = compiledTemplate.makeDocumentFragment();
+							loadState.loaded++;
+
+							if(loadState.loaded == loadState.toLoad) cb(loadState.templates);
+						}
+						else console.error('Error loading template');
+					};
+
+					request.onerror = function() {
+						console.error('Error loading template');
+					};
+					request.send();
+				}
+			})
 		}
 	},
 	json : function(url, cb){
@@ -180,5 +260,17 @@ var _get = {
 		};
 
 		request.send();
+	}
+}
+
+var _view = {
+	set : function(){
+		var view = document.getElementsByTagName('main-view')[0];
+		view.innerHTML = '';
+		if(arguments[0] !== ''){
+			for (var i = 0; i < arguments.length; i++) {
+				view.appendChild(arguments[i]);
+			};
+		}
 	}
 }
