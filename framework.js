@@ -92,14 +92,7 @@ var Framework = {
 }
 
 var Namespace = function(namespace){
-	if(namespace == ''){
-		this.namespace = 'default';
-		this.isDefault = true;
-	}
-	else{
-		this.namespace = namespace;
-		this.isDefault = false;
-	}
+	this.namespace = namespace;
 	frameworkCache.namespaceRoutes[this.namespace] = [];
 	frameworkCache.registeredNamespaces.push(this.namespace);
 }
@@ -109,7 +102,7 @@ Namespace.prototype = {
 	listen : function(routeName, func){
 		var thisCache = frameworkCache.namespaceRoutes[this.namespace];
 		// Retrieve all router parameters (e.g. input /test/{id} would find {id})
-		if(routeName == '/' && this.isDefault) frameworkCache.namespaceRoutes['index'] = {cb : func, params : {}};
+		if(routeName == '/' && this.namespace == 'default') frameworkCache.namespaceRoutes['index'] = {cb : func, params : {}};
 		else{
 			var routerParams = routeName.match(/{([^{}]+)}/g, "$1");
 			if(routerParams == null) thisCache.push({route : routeName, cb : func, params : {}});
@@ -127,7 +120,7 @@ Namespace.prototype = {
 }
 
 // Register the default namespace
-var router = new Namespace('');
+var router = new Namespace('default');
 
 // Some basic get methods
 var _get = {
