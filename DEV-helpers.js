@@ -31,14 +31,17 @@ String.prototype.makeDocumentFragment = function(){
     return frag;
 }
 
-var logSubject = function(sub){
+var logDebug = function(sub, msg){
 	// Prepend the subject before the console log, make it allcaps and always 10 characters long
-	var formattedSubject = '';
-	var amountSpaces = (10-sub.length)-1;
-	formattedSubject += sub.toUpperCase()+':';
-	for (var i = 0; i < amountSpaces; i++) {
-		formattedSubject += ' ';
-	};
+	if(frameworkSettings.debug){
+		var formattedSubject = '';
+		var amountSpaces = (10-sub.length)-1;
+		formattedSubject += sub.toUpperCase()+':';
+		for (var i = 0; i < amountSpaces; i++) {
+			formattedSubject += ' ';
+		};
 
-	return formattedSubject;
+		console.log(formattedSubject+msg);
+	}
+
 }

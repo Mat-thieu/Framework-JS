@@ -62,7 +62,7 @@ var Framework = {
 
 			if(!foundMatch){
 				if('404' in frameworkCache.events) frameworkCache.events['404']();
-				else if(frameworkSettings.debug) console.log(logSubject('404')+'No 404 event available');
+				else logDebug('404', 'No 404 event available');
 			}
 		}
 	},
@@ -85,7 +85,7 @@ var Framework = {
 
 		Framework.analyzeHash(window.location.hash);
 		window.onhashchange = function(){
-			if(frameworkSettings.debug) console.log(logSubject('url')+'Hashchange triggered');
+			logDebug('url', 'Hashchange triggered');
 			Framework.analyzeHash(window.location.hash);
 		}
 	}
@@ -109,7 +109,7 @@ Namespace.prototype = {
 	listen : function(routeName, func){
 		var thisCache = frameworkCache.namespaceRoutes[this.namespace];
 		// Retrieve all router parameters (e.g. input /test/{id} would find {id})
-		if(routeName == '/' && this.isDefault)frameworkCache.namespaceRoutes['index'] = {cb : func, params : {}};
+		if(routeName == '/' && this.isDefault) frameworkCache.namespaceRoutes['index'] = {cb : func, params : {}};
 		else{
 			var routerParams = routeName.match(/{([^{}]+)}/g, "$1");
 			if(routerParams == null) thisCache.push({route : routeName, cb : func, params : {}});
@@ -122,7 +122,7 @@ Namespace.prototype = {
 			}
 		}
 
-		if(frameworkSettings.debug) console.log(logSubject('router')+'Listening on route', this.namespace+routeName);
+		logDebug('router', 'Listening on route ' + this.namespace+routeName);
 	}
 }
 
@@ -138,7 +138,7 @@ var _get = {
 			cb(thisTmp(data).makeDocumentFragment());
 		}
 		else{
-			if(frameworkSettings.debug) console.log(logSubject('ajax')+'Retrieving template from server');
+			logDebug('ajax', 'Retrieving template from server');
 			var request = new XMLHttpRequest();
 			request.open('GET', frameworkSettings.templateFolder+'/'+name+'.html', true);
 			request.onload = function() {
@@ -188,7 +188,7 @@ var _get = {
 					if(loadState.loaded == loadState.toLoad) cb(loadState.templates);
 				}
 				else{
-					if(frameworkSettings.debug) console.log(logSubject('ajax')+'Retrieving template from server');
+					logDebug('ajax', 'Retrieving template from server');
 					var request = new XMLHttpRequest();
 					request.open('GET', frameworkSettings.templateFolder+'/'+name+'.html', true);
 					request.onload = function() {
@@ -229,7 +229,7 @@ var _get = {
 		request.open('GET', url, true);
 		request.onload = function() {
 			if (request.ajaxIsSuccessful()) {
-				if(frameworkSettings.debug) console.log(logSubject('ajax')+'Retrieving JSON from server');
+				logDebug('ajax', 'Retrieving JSON from server');
 				var res = false;
 				// Check whether the JSON is valid
 				try{
