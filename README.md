@@ -23,7 +23,7 @@ router.listen('/', function(){
 })
 
 router.listen('/tst/{id}', function(params){
-	// Do something when the url looks like this http://example.com#tst/10
+	// Do something when the url looks like this http://example.com#/tst/10
 	// Retrieve the url parameter {id} by using the callback variable params['id']
 	// Note that you can have as many url parameters as you like
 })
