@@ -1,160 +1,161 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<title>Framework</title>
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.2/css/materialize.min.css">
-	<script src="DEV-helpers.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.5/handlebars.min.js"></script>
-	<script src="framework.js"></script>
+    <meta charset="UTF-8">
+    <title>Framework</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.2/css/materialize.min.css">
+    <script src="DEV-helpers.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.5/handlebars.min.js"></script>
+    <script src="framework.js"></script>
 </head>
 <body>
-	<div class="container">
-		<div class="row">
-			<div class="col s12">
-				<h2>Framework</h2>
-				<a href="#/">Home</a><br>
-				<a href="#/tst/10">Test</a><br>
-				<a href="#/card/1">Settings</a><br>
-				<a href="#/doubleTemplate">Multi template</a><br>
-				<a href="#/test/one">Namespace test</a><br>
-				<a href="#/derp/one/yuan">Namespace one yuan derp</a><br>
-				<a href="#/derp/one">Namespace derp</a>
-				<main-view></main-view>
-			</div>
-		</div>
-	</div>
+    <div class="container">
+        <div class="row">
+            <div class="col s12">
+                <h2>Framework</h2>
+                <a href="#/">Home</a><br>
+                <a href="#/tst/10">Test</a><br>
+                <a href="#/card/1">Settings</a><br>
+                <a href="#/doubleTemplate">Multi template</a><br>
+                <a href="#/test/one">Namespace test</a><br>
+                <a href="#/derp/one/yuan">Namespace one yuan derp</a><br>
+                <a href="#/derp/one">Namespace derp</a>
+                <main-view></main-view>
+            </div>
+        </div>
+    </div>
 <script>
 // Methods for the sake of this example
 var _id = function(id){return document.getElementById(id);},
-	_class = function(className){return document.getElementsByClassName(className);},
-	_tag = function(tag){return document.getElementsByTagName(tag);},
-	_query = function(query){return document.querySelectorAll(query);};
+    _class = function(className){return document.getElementsByClassName(className);},
+    _tag = function(tag){return document.getElementsByTagName(tag);},
+    _query = function(query){return document.querySelectorAll(query);};
 
-	Object.defineProperty(Object.prototype, 'on', {
-		value: function(eventName, cb) {
-			if(this.constructor.name == 'HTMLCollection' || this.constructor.name == 'NodeList'){
-				for (var i = this.length - 1; i >= 0; i--) this[i].addEventListener(eventName, function(e){cb(e)}, false);
-			}
-			else this.addEventListener(eventName, function(e){cb(e)}, false);
-		},
-		enumerable: false
-	});
+    Object.defineProperty(Object.prototype, 'on', {
+        value: function(eventName, cb) {
+            if(this.constructor.name == 'HTMLCollection' || this.constructor.name == 'NodeList'){
+                for (var i = this.length - 1; i >= 0; i--) this[i].addEventListener(eventName, function(e){cb(e)}, false);
+            }
+            else this.addEventListener(eventName, function(e){cb(e)}, false);
+        },
+        enumerable: false
+    });
 // DEV: Branches-mini version
 String.prototype.$ = function(attr){
-		var ele = document.createElement(this);
-		if(attr) for(key in attr) ele.setAttribute(key, attr[key]);
+        var ele = document.createElement(this);
+        if(attr) for(key in attr) ele.setAttribute(key, attr[key]);
 
-		var branchesInstance = new Branches(ele);
-		return branchesInstance;
+        var branchesInstance = new Branches(ele);
+        return branchesInstance;
 };
 var Branches = function(ele){ this.ele = ele;}
 Branches.prototype = {
-	txt : function(content){
-		var txtNode = document.createTextNode(content);
-		this.ele.appendChild(txtNode);
-		return this;
-	},
-	html : function(customHtml){
-		this.ele.innerHTML = customHtml;
-		return this;
-	},
-	add : function(content){
-		var self = this;
-		content.forEach(function(val, ind){
-			if(val == '[object NodeList]' || val == '[object HTMLCollection]'){
-				for (var i = val.length - 1; i >= 0; i--) { self.ele.appendChild(val[i]) };
-			}
-			else self.ele.appendChild(val.ele);
+    txt : function(content){
+        var txtNode = document.createTextNode(content);
+        this.ele.appendChild(txtNode);
+        return this;
+    },
+    html : function(customHtml){
+        this.ele.innerHTML = customHtml;
+        return this;
+    },
+    add : function(content){
+        var self = this;
+        content.forEach(function(val, ind){
+            if(val == '[object NodeList]' || val == '[object HTMLCollection]'){
+                for (var i = val.length - 1; i >= 0; i--) { self.ele.appendChild(val[i]) };
+            }
+            else self.ele.appendChild(val.ele);
 
-		})
-		return this;
-	},
-	raw : function(){ return this.ele.outerHTML; },
-	get : function(){ return this.ele; },
-	resolve : function(){
-		var frag = document.createDocumentFragment();
-		frag.appendChild(this.ele);
-		return frag;
-	}
+        })
+        return this;
+    },
+    raw : function(){ return this.ele.outerHTML; },
+    get : function(){ return this.ele; },
+    resolve : function(){
+        var frag = document.createDocumentFragment();
+        frag.appendChild(this.ele);
+        return frag;
+    }
 }
 
 // Default namespace routes
 router.listen('/', function(){
-	_get.template('home', {lorem : "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Cumque, reiciendis."}, function(tmp){
-		_view.set(tmp);
-	})
+    _get.template('home', {lorem : "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Cumque, reiciendis."}, function(tmp){
+        _view.set(tmp);
+    })
 })
 
 router.listen('/tst/{id}', function(params){
-	_get.json('api.php', function(data){
-		_get.template('test', {title : 'Epic list', id : params['id'], data : data}, function(tmp){
-			_view.set(tmp);
-		})
-	})
+    _get.json('api.php', function(data){
+        _get.template('test', {title : 'Epic list', id : params['id'], data : data}, function(tmp){
+            _view.set(tmp);
+        })
+    })
 })
 
 router.listen('/compile', function(){
-	_get.template('engineUpdate', {test : "Hello World"}, function(template){
-		_view.set(template);
-	})
+    _get.template('engineUpdate', {test : "Hello World"}, function(template){
+        _view.set(template);
+    })
 })
 
 router.listen('/card/{cardId}', function(params){
-	var cardCount = parseInt(params['cardId'])+1;
+    var cardCount = parseInt(params['cardId'])+1;
 
-	_get.template('settings',{
-		title : 'Card '+params['cardId']+'!',
-		text : 'Some random text',
-		linkName : 'Next card',
-		cardId : cardCount
-	},
-	function(tmp){
-		_view.set(tmp);
-	})
+    _get.template('settings',{
+        title : 'Card '+params['cardId']+'!',
+        text : 'Some random text',
+        linkName : 'Next card',
+        cardId : cardCount
+    },
+    function(tmp){
+        _view.set(tmp);
+    })
 })
 
 router.listen('/doubleTemplate', function(){
-	_get.templates(
-		['home', 'engineUpdate'],
-		{lorem : "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Cumque, reiciendis.", test : "Hello World"},
-	function(res){
-		_view.set(res['engineUpdate'], res['home']);
-	})
+    _get.templates(
+        ['home', 'engineUpdate'],
+        {lorem : "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Cumque, reiciendis.", test : "Hello World"},
+    function(res){
+        _view.set(res['engineUpdate'], res['home']);
+    })
 })
 
 var testRouter = new Namespace('/test');
 
-	testRouter.listen('/one', function(){
-		_view.set( 'h2'.$().txt('Test one.').resolve() );
-	})
+    testRouter.listen('/one', function(){
+        _view.set( 'h2'.$().txt('Test one.').resolve() );
+    })
 
 var derpRouter = new Namespace('/derp');
 
-	derpRouter.listen('/one', function(){
-		_view.set( 'h2'.$().txt('Derp one.').resolve() );
-	})
+    derpRouter.listen('/one', function(){
+        _view.set( 'h2'.$().txt('Derp one.').resolve() );
+    })
 
-	derpRouter.listen('/one/yuan', function(){
-		_view.set( 'h2'.$().txt('Derp one yuan.').resolve() );
-	})
+    derpRouter.listen('/one/yuan', function(){
+        _view.set( 'h2'.$().txt('Derp one yuan.').resolve() );
+    })
 
-	derpRouter.listen('/two', function(){
-		_view.set( 'h2'.$().txt('Derp two.').resolve() );
-	})
+    derpRouter.listen('/two', function(){
+        _view.set( 'h2'.$().txt('Derp two.').resolve() );
+    })
 
 // Handle 404
 Framework.on('404', function(){
-	_view.set( 'h2'.$().txt('404 not found.').resolve() );
+    _view.set( 'h2'.$().txt('404 not found.').resolve() );
 })
 
 Framework.init({
-	templateFolder : '/templates',
-	debug : true,
-	localstorageCaching : {
-		enabled : true,
-		expiration : 0.25 // Hours
-	}
+    templateFolder : '/templates',
+    viewOutput : document.querySelector('main-view'),
+    debug : true,
+    localstorageCaching : {
+        enabled : true,
+        expiration : 0.25 // Hours
+    }
 });
 </script>
 </body>

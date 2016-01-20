@@ -125,7 +125,7 @@ I have not looked at security.
 
 **Todo**
 
+- Write a sick XHR class
 - Perhaps add a method that first loads JSON and then directly injects it into a given template (this might be too much for a boilerplate script)
 - ~~Create multi template getter~~, perhaps a multi data injector as well
-- The regex that matches the routes needs some improvement, it's causing some unexpected behaviour in very specific cases.
 
